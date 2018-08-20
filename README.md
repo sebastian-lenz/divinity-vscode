@@ -64,7 +64,7 @@ You can rename custom procedures, databases and queries as well as variables and
 
 ### API Explorer
 
-Built in browser for the complete API with contents fetched from the Divinity Wiki when available. Open the command palette (e.g. press Ctrl+Shift+P) and search for the command `Show API explorer` to open the API explorer.
+Built in browser for the complete API with contents fetched from the Divinity Wiki when available. Open the command palette (e.g. press Ctrl+Shift+P) and search for the command `Show API explorer` to open the API explorer. The "Show definition" command (in the context menu or F12) directly brings you to the documentation page of the selected symbol.
 
 ![API explorer](resources/features/api-explorer.gif)
 

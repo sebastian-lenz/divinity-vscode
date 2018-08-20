@@ -19,6 +19,7 @@ export interface ResourceOptions {
 }
 
 export default abstract class Resource<T extends AnyNode = AnyNode> {
+  isDeleted: boolean = false;
   readonly story: Story;
 
   protected diagnostics: Array<Diagnostic> = [];
@@ -118,8 +119,12 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   setDocument(document: TextDocument | null) {
     this.document = document;
 
-    if (document == null) {
+    if (document === null) {
       this.rootNode = null;
+    }
+
+    if (document === null && this.isDeleted) {
+      this.story.removeResource(this);
     }
   }
 
@@ -133,5 +138,11 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
     ];
 
     this.getProjects().emit("diagnostics", this);
+  }
+
+  setIsDeleted(isDeleted: boolean) {
+    if (this.isDeleted === isDeleted) return;
+    this.isDeleted = isDeleted;
+    this.story.updateTree();
   }
 }

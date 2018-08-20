@@ -13,6 +13,7 @@ export default abstract class FileResource<
   T extends AnyNode = AnyNode
 > extends Resource<T> {
   readonly path: string;
+
   constructor(options: FileResourceOptions) {
     super(options);
     this.path = normalize(options.path);

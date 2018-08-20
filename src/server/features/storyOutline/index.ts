@@ -179,11 +179,13 @@ export default class StoryOutlineFeature extends Feature {
     goals: Array<Goal>,
     stack: Array<Goal> = []
   ): Array<GoalInfo> {
-    return goals.filter(goal => stack.indexOf(goal) === -1).map(goal => ({
-      children: this.createTree(goal.getSortedChildren(), [...stack, goal]),
-      isShared: !goal.resource || goal.resource instanceof HeaderGoalResource,
-      name: goal.name,
-      uri: goal.resource.getUri()
-    }));
+    return goals
+      .filter(goal => !goal.resource.isDeleted && stack.indexOf(goal) === -1)
+      .map(goal => ({
+        children: this.createTree(goal.getSortedChildren(), [...stack, goal]),
+        isShared: !goal.resource || goal.resource instanceof HeaderGoalResource,
+        name: goal.name,
+        uri: goal.resource.getUri()
+      }));
   }
 }

@@ -61,7 +61,11 @@ export default class Story {
 
   async analyzeGoals() {
     for (const resource of this.resources) {
-      if (resource instanceof GoalResource && resource.getDocument()) {
+      if (
+        resource instanceof GoalResource &&
+        !resource.isDeleted &&
+        resource.getDocument()
+      ) {
         await resource.analyze();
       }
     }
@@ -221,13 +225,18 @@ export default class Story {
         this.resources.push(resource);
       }
 
+      resource.setIsDeleted(false);
       this.queue.add(resource.load);
     });
 
     watcher.on("remove", path => {
       const resource = this.findResource(path);
       if (resource) {
-        this.removeResource(resource);
+        if (resource.getDocument()) {
+          resource.setIsDeleted(true);
+        } else {
+          this.removeResource(resource);
+        }
       }
     });
 

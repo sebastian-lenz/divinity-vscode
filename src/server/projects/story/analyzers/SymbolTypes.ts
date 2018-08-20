@@ -12,13 +12,16 @@ import { SymbolType } from "../models/symbol";
 import { NodeType } from "../../../parsers/story/models/nodes";
 
 export default class SymbolTypesAnalyzer extends SyncAnalyzer {
-  analyze({ node, resource }: AnalyzerContext) {
-    if (!isCallerNode(node)) return;
-    const { symbol } = node;
+  analyze({ node, resource }: AnalyzerContext): boolean {
+    if (!isCallerNode(node)) {
+      return false;
+    }
 
     // This should actually not happen right now
+    const { symbol } = node;
     if (!symbol) {
-      return this.addDiagnostic(node, msgUnresolvedSymbol({ node }));
+      this.addDiagnostic(node, msgUnresolvedSymbol({ node }));
+      return true;
     }
 
     // Helper: Filter out invalid symbols
@@ -34,13 +37,14 @@ export default class SymbolTypesAnalyzer extends SyncAnalyzer {
         .filter(filterSymbol);
 
       if (existingSymbols.length) {
-        return this.addDiagnostic(
+        this.addDiagnostic(
           node,
           msgParamaterCountMismatch({
             actualSymbol: symbol,
             existingSymbols
           })
         );
+        return true;
       }
 
       // Check for symbols with a similiar name
@@ -49,17 +53,19 @@ export default class SymbolTypesAnalyzer extends SyncAnalyzer {
         .filter(filterSymbol);
 
       if (similiarSymbols.length) {
-        return this.addDiagnostic(
+        this.addDiagnostic(
           node,
           msgSigantureTypo({
             actualSymbol: symbol,
             similiarSymbols
           })
         );
+        return true;
       }
 
       // Still no luck - create database error
-      return this.addDiagnostic(node, msgInvalidDatabasePrefix({ symbol }));
+      this.addDiagnostic(node, msgInvalidDatabasePrefix({ symbol }));
+      return true;
     }
 
     // Procedure / Query definition with undefined parameters
@@ -68,19 +74,21 @@ export default class SymbolTypesAnalyzer extends SyncAnalyzer {
       !symbol.resolvedDefinition &&
       !symbol.isSystem
     ) {
-      return this.addDiagnostic(
-        node,
-        msgUnresolvedSignature({ symbol, rule: node })
-      );
+      this.addDiagnostic(node, msgUnresolvedSignature({ symbol, rule: node }));
+      return true;
     }
 
     // Database warnings
     if (symbol.type === SymbolType.Database) {
       if (symbol.isDead || !symbol.dbWrites) {
-        return this.addDiagnostic(node, msgDatabaseNoWrite({ symbol }));
+        this.addDiagnostic(node, msgDatabaseNoWrite({ symbol }));
+        return true;
       } else if (!symbol.dbReads && symbol.searchName !== "db_noop") {
-        return this.addDiagnostic(node, msgDatabaseNoRead({ symbol }));
+        this.addDiagnostic(node, msgDatabaseNoRead({ symbol }));
+        return true;
       }
     }
+
+    return false;
   }
 }

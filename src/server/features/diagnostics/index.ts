@@ -5,6 +5,7 @@ import Feature from "../Feature";
 import Resource from "../../projects/story/resources/Resource";
 import Server from "../../Server";
 import parseUri from "../../utils/parseUri";
+import unpackRange from "../../parsers/story/utils/unpackRange";
 
 export default class DiagnosticsFeature extends Feature {
   constructor(server: Server) {
@@ -60,7 +61,7 @@ export default class DiagnosticsFeature extends Feature {
       uri: file.getUri(),
       diagnostics: file.getDiagnostics().map(diagnostics => ({
         severity: diagnostics.severity,
-        range: diagnostics.range,
+        range: unpackRange(diagnostics),
         message: diagnostics.message
       }))
     });

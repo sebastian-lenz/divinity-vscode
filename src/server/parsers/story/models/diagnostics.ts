@@ -1,4 +1,5 @@
-import { DiagnosticSeverity, Range } from "vscode-languageserver";
+import { DiagnosticSeverity } from "vscode-languageserver";
+import { TokenRange } from "../Lexer";
 
 export { DiagnosticSeverity };
 
@@ -13,8 +14,7 @@ export enum DiagnosticType {
   Syntax
 }
 
-export interface Diagnostic extends DiagnosticMessage {
-  range: Range;
+export interface Diagnostic extends DiagnosticMessage, TokenRange {
   type: DiagnosticType;
 }
 
@@ -123,6 +123,7 @@ export const enum DiagnosticCode {
 
   // Custom
   // ---------------------------------
+  InvalidToken = "E1000",
   PrematureRealEnd = "E1001",
   NewLineInString = "E1002",
   UnexpectedToken = "E1003",

@@ -1,18 +1,19 @@
 import eachNodeRecursive from "../../../parsers/story/utils/eachNodeRecursive";
+import ParameterAnalyzer from "./Parameter";
 import Resource from "../resources/Resource";
 import Story from "..";
 import SymbolLocationsAnalyzer from "./SymbolLocations";
 import SymbolTypesAnalyzer from "./SymbolTypes";
+import SyntaxErrorAnalyzer from "./SyntaxError";
 import { AnyAnalyzer, AnalyzerContext, SyncAnalyzer } from "./Analyzer";
 import { Diagnostic } from "../../../parsers/story/models/diagnostics";
-import { StoryGoalNode } from "../../../parsers/story/models/nodes";
+import { StoryGoalNode, AnyNode } from "../../../parsers/story/models/nodes";
 import {
   isInScope,
   Scope,
   tryStartScope,
   updateScope
 } from "../../../parsers/story/utils/eachRuleNode";
-import ParameterAnalyzer from "./Parameter";
 
 export default class Analyzers {
   readonly diagnostics: Array<Diagnostic> = [];
@@ -22,6 +23,7 @@ export default class Analyzers {
   constructor(story: Story) {
     this.story = story;
     this.workers = [
+      new SyntaxErrorAnalyzer(this),
       new SymbolTypesAnalyzer(this),
       new SymbolLocationsAnalyzer(this),
       new ParameterAnalyzer(this)
@@ -34,6 +36,7 @@ export default class Analyzers {
   ): Promise<Array<Diagnostic>> {
     const { workers } = this;
     let scope: Scope | null = null;
+    let skipNode: AnyNode | null = null;
 
     const context: AnalyzerContext = {
       node: rootNode,
@@ -49,15 +52,29 @@ export default class Analyzers {
       if (scope && !isInScope(scope, stack)) scope = null;
       scope = scope ? updateScope(scope, node) : tryStartScope(node);
 
+      if (skipNode) {
+        if (stack.indexOf(skipNode) === -1) {
+          skipNode = null;
+        } else {
+          continue;
+        }
+      }
+
       context.node = node;
       context.scope = scope;
       context.stack = stack;
 
       for (const worker of workers) {
+        let didEmitDiagnostic: boolean = false;
         if (worker instanceof SyncAnalyzer) {
-          worker.analyze(context);
+          didEmitDiagnostic = worker.analyze(context);
         } else if (worker.canAnalyze(context)) {
-          await worker.analyze(context);
+          didEmitDiagnostic = await worker.analyze(context);
+        }
+
+        if (didEmitDiagnostic) {
+          skipNode = node;
+          break;
         }
       }
     }

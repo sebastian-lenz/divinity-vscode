@@ -1,9 +1,6 @@
-import { Range } from "vscode-languageserver";
-
 import Analyzers from "./index";
 import isCallerNode from "../../../parsers/story/utils/isCallerNode";
 import Resource from "../resources/Resource";
-import unpackRange from "../../../parsers/story/utils/unpackRange";
 import { Scope } from "../../../parsers/story/utils/eachRuleNode";
 import { StoryGoalNode, AnyNode } from "../../../parsers/story/models/nodes";
 
@@ -11,14 +8,6 @@ import {
   DiagnosticType,
   DiagnosticMessage
 } from "../../../parsers/story/models/diagnostics";
-
-function resolveRange(node: AnyNode): Range {
-  if (isCallerNode(node)) {
-    node = node.signature.identifier;
-  }
-
-  return unpackRange(node);
-}
 
 export type AnyAnalyzer = SyncAnalyzer | AsyncAnalyzer;
 
@@ -38,19 +27,26 @@ export abstract class Analyzer {
   }
 
   addDiagnostic(range: AnyNode, message: DiagnosticMessage) {
+    if (isCallerNode(range)) {
+      range = range.signature.identifier;
+    }
+
     this.analyzers.diagnostics.push({
       ...message,
-      range: unpackRange(range),
+      endOffset: range.endOffset,
+      endPosition: range.endPosition,
+      startOffset: range.startOffset,
+      startPosition: range.startPosition,
       type: DiagnosticType.Syntax
     });
   }
 }
 
 export abstract class SyncAnalyzer extends Analyzer {
-  abstract analyze(context: AnalyzerContext): void;
+  abstract analyze(context: AnalyzerContext): boolean;
 }
 
 export abstract class AsyncAnalyzer extends Analyzer {
-  abstract async analyze(context: AnalyzerContext): Promise<void>;
+  abstract async analyze(context: AnalyzerContext): Promise<boolean>;
   abstract canAnalyze(context: AnalyzerContext): boolean;
 }

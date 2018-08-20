@@ -81,7 +81,7 @@ function castType(
   if (from === to) return from;
   if (isGuidType(from) && isGuidType(to)) return to;
   if (isIntegerType(from) && isIntegerType(to)) return to;
-  if (isNumericType(from) && isNumericType(to)) return to;
+  if (allowNumericCast && isNumericType(from) && isNumericType(to)) return to;
 
   return ParameterType.Invalid;
 }
@@ -117,16 +117,17 @@ function getArgumentType(
 }
 
 export default class ParameterAnalyzer extends SyncAnalyzer {
-  analyze({ node, scope }: AnalyzerContext) {
+  analyze({ node, scope }: AnalyzerContext): boolean {
     if (node.type === NodeType.OperatorCondition) {
       this.analyzeOperator(scope, node);
+      return false;
     } else if (isCallerNode(node) && node.symbol) {
       const { symbol } = node;
       const { parameters } = node.signature;
       const definitions = symbol.parameters;
 
       if (definitions.length !== parameters.length) {
-        return;
+        return false;
       }
 
       for (let index = 0; index < definitions.length; index++) {
@@ -140,6 +141,8 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
         );
       }
     }
+
+    return false;
   }
 
   analyzeOperator(scope: Scope | null, operator: OperatorNode) {

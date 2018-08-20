@@ -1,7 +1,7 @@
+import msgInvalidToken from "./messages/msgInvalidToken";
 import msgNewLineInString from "./messages/msgNewLineInString";
 import msgPrematureRealEnd from "./messages/msgPrematureRealEnd";
 import packPosition from "./utils/packPosition";
-import unpackRange from "./utils/unpackRange";
 
 import {
   DiagnosticType,
@@ -143,6 +143,7 @@ export default class Lexer {
   diagnostics: Array<Diagnostic> = [];
   source: string;
   character: number = -1;
+  isInvalid: boolean = false;
   lastComment: string | null = null;
   line: number = 0;
   offset: number = 0;
@@ -180,7 +181,10 @@ export default class Lexer {
     if (range) {
       this.diagnostics.push({
         ...message,
-        range: unpackRange(range),
+        endOffset: range.endOffset,
+        endPosition: range.endPosition,
+        startOffset: range.startOffset,
+        startPosition: range.startPosition,
         type: DiagnosticType.Syntax
       });
     }
@@ -433,6 +437,9 @@ export default class Lexer {
           type = TokenType.LineComment;
           offset += 1;
           character += 1;
+        } else {
+          type = TokenType.Invalid;
+          break;
         }
       } else if (isOperantChar(char)) {
         nextChar = source.charCodeAt(offset);
@@ -446,6 +453,9 @@ export default class Lexer {
         } else if (char === CHAR_GREATER_THAN || char === CHAR_LOWER_THAN) {
           value[valueOffset++] = char;
           type = TokenType.Operator;
+          break;
+        } else {
+          type = TokenType.Invalid;
           break;
         }
       } else if (isIdentifierStartChar(char)) {
@@ -521,6 +531,15 @@ export default class Lexer {
 
     if (token.type === TokenType.StringLiteral && /[\r\n]/.test(token.value)) {
       this.addDiagnostic(token, msgNewLineInString());
+    }
+
+    if (token.type === TokenType.Invalid) {
+      if (!this.isInvalid) {
+        this.isInvalid = true;
+        this.addDiagnostic(token, msgInvalidToken({ value: token.value }));
+      }
+    } else {
+      this.isInvalid = false;
     }
   }
 }

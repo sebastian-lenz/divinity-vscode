@@ -31,7 +31,7 @@ export default function msgUnexpectedToken({
   expectedToken
 }: Params): DiagnosticMessage {
   let message = "Unexpected token";
-  if (actualToken) message += `"${printTokenType(actualToken)}"`;
+  if (actualToken) message += ` "${printTokenType(actualToken)}"`;
 
   if (expectedHint) {
     message += `, expected ${hints[expectedHint]}`;

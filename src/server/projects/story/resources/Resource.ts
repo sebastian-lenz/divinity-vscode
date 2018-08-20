@@ -43,7 +43,9 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   dispose() {
     if (this.document) this.document = null;
     if (this.rootNode) this.rootNode = null;
+
     this.diagnostics.length = 0;
+    this.getProjects().emit("diagnostics", this);
   }
 
   async load(noAnalysis?: boolean): Promise<T> {
@@ -114,6 +116,11 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
 
   invalidate() {
     this.story.queue.add(this.load);
+  }
+
+  protected setAllDiagnostics(diagnostics: Array<Diagnostic>) {
+    this.diagnostics = diagnostics;
+    this.getProjects().emit("diagnostics", this);
   }
 
   setDocument(document: TextDocument | null) {

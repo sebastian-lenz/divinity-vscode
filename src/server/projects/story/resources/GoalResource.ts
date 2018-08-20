@@ -60,7 +60,6 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
       return node;
     }
 
-    this.setDiagnostics(DiagnosticType.Syntax, diagnostics);
     story.symbols.updateGoal(goal, node);
 
     const parents = node.parentTargetEdges;
@@ -68,10 +67,12 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
     story.symbols.update();
 
     if (!story.isInitializing) {
-      this.setDiagnostics(
-        DiagnosticType.Analyzer,
-        await story.analyzers.apply(this, node)
-      );
+      this.setAllDiagnostics([
+        ...diagnostics,
+        ...(await story.analyzers.apply(this, node))
+      ]);
+    } else {
+      this.setDiagnostics(DiagnosticType.Syntax, diagnostics);
     }
 
     return node;

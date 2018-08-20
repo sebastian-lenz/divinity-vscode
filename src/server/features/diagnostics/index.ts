@@ -58,13 +58,10 @@ export default class DiagnosticsFeature extends Feature {
 
     connection.sendDiagnostics({
       uri: file.getUri(),
-      diagnostics: file.getDiagnostics().map(d => ({
-        severity: d.severity,
-        range: {
-          start: d.range.start,
-          end: d.range.end
-        },
-        message: d.message
+      diagnostics: file.getDiagnostics().map(diagnostics => ({
+        severity: diagnostics.severity,
+        range: diagnostics.range,
+        message: diagnostics.message
       }))
     });
   };

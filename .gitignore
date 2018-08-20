@@ -1,0 +1,10 @@
+.vscode
+bin
+etc
+lib
+node_modules
+
+docs
+!docs/compile.bat
+!docs/LICENSE
+!docs/update.bat

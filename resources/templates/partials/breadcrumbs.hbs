@@ -1,0 +1,11 @@
+<div class="divinityBreadcrumb">
+  {{#each category.parents}}
+  <div class="divinityBreadcrumb--item"><span class="divinityLink" data-goto="/category/{{ qualifiedName }}">{{ displayName
+      }}
+    </span></div>
+  {{/each}}{{#if includeSelf}}
+  <div class="divinityBreadcrumb--item"><span class="divinityLink" data-goto="/category/{{ category.qualifiedName }}">{{
+      category.displayName }}
+    </span></div>
+  {{/if}}
+</div>

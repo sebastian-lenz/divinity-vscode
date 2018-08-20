@@ -1,0 +1,39 @@
+{{> breadcrumbs includeSelf=1 }}
+<h1><span class="divinityIcon large {{ type }}"></span> {{ title }}</h1>
+
+<h2 class="divinitySection">Signatures</h2>
+<div class="divinitySignatutes">
+  {{#each signatures}}
+  <div class="divinitySignatutes--item">
+    <span class="mtk12">{{~ name ~}}</span>(
+    {{#if parameters}}
+      {{~#each parameters~}}<br/>&nbsp;&nbsp;
+        {{~#if flow}}[{{ flow }}]{{/if~}}
+        {{~#if type}}<span class="mtk11">({{ type }})</span>{{/if~}}
+        <span class="mtk13">{{~ name ~}}</span>
+        {{~#if @last}}{{else}}, {{/if~}}
+      {{~/each~}}<br />
+    {{/if}})
+  </div>
+  {{/each}} 
+</div>
+
+{{#if wiki}}
+  {{#if wiki.error}}
+    <h2 class="divinitySection">Documentation</h2>
+    <p>The Wiki could not be reached or returned an error.</p>
+  {{/if}}
+  {{#if wiki.notFound}}
+    <h2 class="divinitySection">Documentation</h2>
+    <p>There is no documentation available for this definition.</p>
+  {{/if}}
+  {{#if wiki.content}}
+    {{{ wiki.content }}}
+  {{/if}}
+  {{#if wiki.editLink}}
+    <p><a href="{{ wiki.editLink }}">Edit this page</a></p>
+  {{/if}}
+{{/if}}
+
+<h2 class="divinitySection">See also</h2>
+{{> definitions}}

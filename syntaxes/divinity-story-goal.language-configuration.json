@@ -1,0 +1,16 @@
+{
+  "comments": {
+    "lineComment": "//",
+    "blockComment": ["/*", "*/"]
+  },
+  "brackets": [["{", "}"], ["[", "]"], ["(", ")"]],
+  "autoClosingPairs": [["{", "}"], ["[", "]"], ["(", ")"], ["\"", "\""]],
+  "surroundingPairs": [["{", "}"], ["[", "]"], ["(", ")"], ["\"", "\""]],
+  "folding": {
+    "offSide": true,
+    "markers": {
+      "start": "^\\s*//REGION",
+      "end": "^\\s*//END_REGION"
+    }
+  }
+}

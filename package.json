@@ -1,0 +1,274 @@
+{
+  "name": "divinity-vscode",
+  "displayName": "Divinity Engine Script Support",
+  "description": "VS Code language support for Divinity Engine story scripts",
+  "author": "Sebastian Lenz",
+  "license": "MIT",
+  "version": "1.0.0",
+  "publisher": "sebastian-lenz",
+  "categories": [
+    "Programming Languages"
+  ],
+  "icon": "resources/extension.png",
+  "keywords": [
+    "Larian",
+    "Divinity Engine",
+    "Osiris",
+    "Story Script"
+  ],
+  "engines": {
+    "vscode": "^1.25.0"
+  },
+  "activationEvents": [
+    "workspaceContains:**/Story/story.div",
+    "workspaceContains:**/RawFiles/story_header.div",
+    "onLanguage:divinity-story-goal",
+    "onLanguage:divinity-story-div",
+    "onWebviewPanel:divinity.apiExplorer"
+  ],
+  "homepage": "https://github.com/sebastian-lenz/divinity-vscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastian-lenz/divinity-vscode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sebastian-lenz/divinity-vscode/issues"
+  },
+  "main": "./lib/client",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Divinity Engine configuration",
+      "properties": {
+        "divinityScript.autoStart": {
+          "scope": "window",
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, the language support will start automatically. Otherwise it will start when opening an Osiris script file."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "divinity.showApiExplorer",
+        "title": "Show API explorer",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.storyOutline.openGoal",
+        "title": "Open Goal",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.storyOutline.addGoal",
+        "title": "Add new Goal",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.storyOutline.renameGoal",
+        "title": "Rename Goal",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.storyOutline.deleteGoal",
+        "title": "Delete Goal",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.storyOutline.moveGoal",
+        "title": "Move Goal",
+        "category": "Divinity"
+      }
+    ],
+    "languages": [
+      {
+        "id": "divinity-story-goal",
+        "aliases": [
+          "Divinity story goal",
+          "divinity-story-goal"
+        ],
+        "extensions": [
+          ".divGoal"
+        ],
+        "filenamePatterns": [
+          "**/Story/RawFiles/Goals/*.txt"
+        ],
+        "configuration": "./syntaxes/divinity-story-goal.language-configuration.json"
+      },
+      {
+        "id": "divinity-story-div",
+        "aliases": [
+          "Divinity story div",
+          "divinity-story-div"
+        ],
+        "extensions": [
+          ".div"
+        ],
+        "configuration": "./syntaxes/divinity-story-div.language-configuration.json"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "divinity.storyOutline.openGoal",
+          "when": "view == divinity.storyOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "divinity.storyOutline.addGoal",
+          "when": "view == divinity.storyOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "divinity.storyOutline.renameGoal",
+          "when": "view == divinity.storyOutline && viewItem != sharedGoal",
+          "group": "1_modification"
+        },
+        {
+          "command": "divinity.storyOutline.deleteGoal",
+          "when": "view == divinity.storyOutline && viewItem != sharedGoal",
+          "group": "1_modification"
+        },
+        {
+          "command": "divinity.storyOutline.moveGoal",
+          "when": "view == divinity.storyOutline && viewItem != sharedGoal",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "grammars": [
+      {
+        "language": "divinity-story-div",
+        "scopeName": "text.divinity.storydiv",
+        "path": "./syntaxes/divinity-story-div.tmLanguage.json"
+      },
+      {
+        "language": "divinity-story-goal",
+        "scopeName": "text.divinity.storygoal",
+        "path": "./syntaxes/divinity-story-goal.tmLanguage.json"
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "divinity.problemMatcher",
+        "owner": "divinity-vscode",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(WARN|ERR!) ((?:[^:]+:\\\\)?[^:]*):(\\d+):(\\d+): \\[(\\d+)\\] (.*)$",
+          "severity": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "divinity-story-goal",
+        "path": "./syntaxes/divinity-story-goal.snippets.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "divinity.task.compiler",
+        "required": [
+          "gameDataPath",
+          "output",
+          "mod"
+        ],
+        "properties": {
+          "gameDataPath": {
+            "type": "string",
+            "description": "Location of the game Data folder"
+          },
+          "output": {
+            "type": "string",
+            "description": "Compiled story output path"
+          },
+          "mod": {
+            "type": "array",
+            "description": "Check and compile all goals from the specified mod"
+          },
+          "noWarn": {
+            "type": "array",
+            "description": "Suppress warnings with diagnostic code <code>",
+            "enum": [
+              "alias-mismatch",
+              "db-naming",
+              "guid-prefix",
+              "rule-naming",
+              "string-lt",
+              "unused-db"
+            ]
+          },
+          "checkOnly": {
+            "type": "boolean",
+            "description": "Only check scripts for errors, don't generate compiled story file"
+          },
+          "checkNames": {
+            "type": "boolean",
+            "description": "Verify game object names (slow!)"
+          },
+          "reload": {
+            "type": "string",
+            "description": "Turns on editor level reloading.",
+            "enum": [
+              "reloadStory",
+              "reloadLevelAndStory"
+            ]
+          }
+        }
+      },
+      {
+        "type": "divinity.task.reload"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "divinity.storyOutline",
+          "name": "Story Outline",
+          "when": "divinity.storyOutline.enabled"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "rimraf ./lib/** && tsc -p ./tsconfig.json",
+    "compile:publish": "rimraf ./lib/** && tsc -p ./tsconfig.publish.json",
+    "package": "vsce package",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "mocha",
+    "tidyup": "rimraf ./node_modules/handlebars/.idea && rimraf ./node_modules/handlebars/dist/amd && rimraf ./node_modules/handlebars/lib/handlebars && rimraf ./node_modules/handlebars/package-lock.json",
+    "update-vscode": "node ./node_modules/vscode/bin/install",
+    "vscode:prepublish": "npm run update-vscode && npm run tidyup && npm run compile:publish",
+    "watch": "tsc -w -p ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/fast-levenshtein": "0.0.1",
+    "@types/handlebars": "^4.0.39",
+    "@types/js-yaml": "^3.11.2",
+    "@types/long": "^4.0.0",
+    "@types/marked": "^0.4.0",
+    "@types/node": "^8.10.26",
+    "@types/promise-queue": "^2.2.0",
+    "@types/rimraf": "^2.0.2",
+    "@types/xml2js": "^0.4.3",
+    "js-yaml": "^3.12.0",
+    "mocha": "^5.2.0",
+    "rimraf": "^2.6.2",
+    "typescript": "2.8.3"
+  },
+  "dependencies": {
+    "fast-levenshtein": "^2.0.6",
+    "handlebars": "^4.0.11",
+    "long": "^4.0.0",
+    "promise-queue": "^2.2.5",
+    "vscode": "^1.1.21",
+    "vscode-languageclient": "^5.0.0",
+    "vscode-languageserver": "^5.0.0",
+    "xml2js": "^0.4.19"
+  }
+}

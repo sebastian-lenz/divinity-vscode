@@ -1,0 +1,19 @@
+{{> breadcrumbs}}
+<h1><span class="divinityIcon large"></span> {{ category.displayName }}</h1>
+
+{{#if category.children}}
+<h2 class="divinitySection">Child categories</h2>
+<div class="divinityCompactList">
+  {{#each category.children}}
+  <div class="divinityCompactList--item">
+    <span class="divinityLink" data-goto="/category/{{ qualifiedName }}">
+      <span class="divinityIcon"></span>
+      <span class="divinitySymbolName">{{ displayName }}</span>
+    </span>
+  </div>
+  {{/each}}
+</div>
+{{/if}}
+
+<h2 class="divinitySection">Definitions</h2>
+{{> definitions}}

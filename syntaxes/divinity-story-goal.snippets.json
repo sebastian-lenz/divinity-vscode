@@ -1,0 +1,22 @@
+{
+  "AND": {
+    "prefix": "AND",
+    "body": ["AND", "$0"],
+    "description": "And condition"
+  },
+  "IF": {
+    "prefix": "IF",
+    "body": ["IF", "$0", "THEN"],
+    "description": "Rule definition"
+  },
+  "PROC": {
+    "prefix": "PROC",
+    "body": ["PROC", "$0", "THEN"],
+    "description": "Procedure definition"
+  },
+  "QRY": {
+    "prefix": "QRY",
+    "body": ["QRY", "$0", "THEN", "DB_NOOP(1);"],
+    "description": "Query definition"
+  }
+}

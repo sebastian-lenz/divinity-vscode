@@ -1,0 +1,242 @@
+Version 1
+SubGoalCombiner SGC_AND
+
+INITSECTION
+
+DB_String("IAmAGUID_12345678-1234-1234-1234-12345678abcd");
+// DB_StringGuid(IAmAGUIDToo_55555555-5555-5555-5555-555555555555);
+DB_Int(1234);
+// DB_Float(123.456);
+
+// ERR! [11] Intrinsic type of column 1 of DB_BadInference differs: Integer vs Integer64
+DB_BadInference(444);
+DB_BadInference((INTEGER64)444);
+
+// WARN [23] Name of database "BaaadDB" should start with the prefix "DB"
+BaaadDB(123);
+
+// ERR! [11] Intrinsic type of column 1 of Call "CharacterFreeze" differs: GuidString vs String
+CharacterFreeze("hahah");
+
+// WARN [25] Database "DB_Unused1(1)" is written to, but is never used in a rule
+DB_Unused1(1);
+
+DB_CharacterGuid((CHARACTERGUID)55555555-5555-5555-5555-555555555555);
+DB_ItemGuid((ITEMGUID)55555555-5555-5555-5555-555555555555);
+
+KBSECTION
+
+IF
+DB_String(_Str)
+AND
+// ERR! [11] Rule variable _Str of type String cannot be casted to Integer
+DB_Int(_Str)
+THEN
+DB_NOOP(1);
+
+// Call rule test
+// ERR! [17] Initial rule condition can only be an event or a DB; "CharacterFreeze(1)" is a Call
+IF
+CharacterFreeze(_)
+THEN
+// OK
+DB_NOOP(1);
+// OK
+NOT DB_NOOP(1);
+// OK
+CharacterFreeze(55555555-5555-5555-5555-555555555555);
+// ERR! [16] KB rule NOT actions can only reference databases; "CharacterFreeze(1)" is a Call
+NOT CharacterFreeze(55555555-5555-5555-5555-555555555555);
+// ERR! [15] KB rule actions can only reference databases, calls and PROCs; "RealMin(3)" is a Query
+RealMin(1.0, 1.0, 1.0);
+
+// OK
+IF
+TradeEnds(_CharA, _CharB)
+THEN
+DB_NOOP(1);
+
+// Event in 2nd condition check
+IF
+TradeEnds(_CharA, _CharB)
+// ERR! [18] Subsequent rule conditions can only be queries or DBs; "TradeEnds(2)" is a Event
+AND
+TradeEnds(_CharA, _CharB)
+THEN
+DB_NOOP(1);
+
+// OK
+PROC
+ProcName((STRING)_Asd)
+THEN
+DB_NOOP(1);
+
+// ERR! [17] Initial proc condition can only be a PROC name; "CharacterFreeze(1)" is a Call
+PROC
+CharacterFreeze((STRING)_Asd)
+THEN
+DB_NOOP(1);
+
+// OK
+QRY
+QryName((STRING)_Asd)
+THEN
+DB_NOOP(1);
+
+// BAD, incompatible with first declaration
+QRY
+// ERR! [11] Intrinsic type of parameter 1 of UserQuery "QryName" differs: String vs Integer
+QryName((INTEGER)_Asd)
+THEN
+DB_NOOP(1);
+
+// ERR! [17] Initial query condition can only be a user-defined QRY name; "RealMin(3)" is a Query
+QRY
+RealMin(_Arg1, _Arg2, _Arg3)
+THEN
+DB_NOOP(1);
+
+// Alias type cast warning check
+IF
+DB_CharacterGuid(_CG)
+AND
+DB_ItemGuid(_IG)
+AND
+// WARN [11] GUID alias cast - LHS/RHS differs: 6 vs 7
+_CG == _IG
+THEN
+DB_NOOP(1);
+
+// Alias type cast warning check 2
+IF
+DB_CharacterGuid(_CG)
+AND
+// WARN [11] GUID alias cast: Rule variable _CG of type 6 casted to 7
+DB_ItemGuid(_CG)
+THEN
+DB_NOOP(1);
+
+// Alias type cast warning check 3
+IF
+DB_CharacterGuid(_CG)
+THEN
+// WARN [11] GUID alias cast: Rule variable _CG of type 6 casted to 7
+NOT DB_ItemGuid(_CG);
+
+// Illogical string comparison warning
+IF
+DB_String(_CG)
+AND
+// WARN [20] String comparison using operator Greater - probably a mistake?
+_CG > "asdf"
+THEN
+DB_NOOP(1);
+
+// Bad constant type
+IF
+// WARN [21] GUID constant "ITEMGUID_12341234-1234-1234-1234-123412341234" has inferred type CHARACTERGUID
+DB_CharacterGuid((CHARACTERGUID)ITEMGUID_12341234-1234-1234-1234-123412341234)
+THEN
+DB_NOOP(1);
+
+// OK
+PROC
+ProcGoodName(_ASD)
+THEN
+DB_NOOP(_ASD);
+
+// Bad PROC naming convention
+PROC
+// WARN [23] Name of PROC "BadProcName(1)" should start with the prefix "PROC"
+BadProcName(_ASD)
+THEN
+DB_NOOP(_ASD);
+
+// OK
+QRY
+QryGoodName((INTEGER)_ASD)
+THEN
+DB_NOOP(1);
+
+// Bad QUERY naming convention
+QRY
+// WARN [23] Name of Query "BadQryName(1)" should start with the prefix "QRY"
+BadQryName((INTEGER)_ASD)
+THEN
+DB_NOOP(1);
+
+// Bad DB naming convention
+IF
+// WARN [23] Name of database "BaaadDB" should start with the prefix "DB"
+BaaadDB((INTEGER)_Arg)
+THEN
+DB_NOOP(1);
+
+// Using unbound names 1
+IF
+DB_CharacterGuid(_Asd)
+AND
+// ERR! [24] Variable _Undef11 was never bound, but was used as parameter _A in Query "IntegerSum(3)"
+// ERR! [24] Variable _Undef12 was never bound, but was used as parameter _B in Query "IntegerSum(3)"
+IntegerSum(_Undef11, _Undef12, _C)
+THEN
+DB_NOOP(1);
+
+// Using unbound names 2
+IF
+DB_CharacterGuid(_Asd)
+AND
+// ERR! [24] Variable _Undef2 was unbound when used in a binary expression
+_Asd != (CHARACTERGUID)_Undef2
+THEN
+DB_NOOP(1);
+
+// Using unbound names 3
+IF
+DB_CharacterGuid(_Asd)
+THEN
+// ERR! [24] Variable _Undef3 was never bound, but was used as parameter 0 in Database "DB_NOOP(1)"
+DB_NOOP((INTEGER)_Undef3);
+
+// Using late-bound names 1
+IF
+DB_CharacterGuid(_Asd)
+AND
+// ERR! [24] Variable _LateBound11 was not bound when used as parameter _A in Query "IntegerSum(3)"
+// ERR! [24] Variable _LateBound12 was not bound when used as parameter _B in Query "IntegerSum(3)"
+IntegerSum(_LateBound11, _LateBound12, _C)
+AND
+DB_Int(_LateBound11)
+AND
+DB_Int(_LateBound12)
+THEN
+DB_NOOP(1);
+
+// Using late-bound names 2
+IF
+DB_CharacterGuid(_Asd)
+AND
+// ERR! [24] Variable _LateBound2 was unbound when used in a binary expression
+_Asd != (CHARACTERGUID)_LateBound2
+AND
+DB_CharacterGuid(_LateBound2)
+THEN
+DB_NOOP(1);
+
+// Check write-only/read-only DBs
+IF
+// WARN [25] Database "DB_Unused3(1)" is used in a rule, but is never written to
+DB_Unused3((STRING)_Unused)
+THEN
+// WARN [25] Database "DB_Unused4(1)" is written to, but is never used in a rule
+DB_Unused4(1);
+
+
+EXITSECTION
+
+// WARN [25] Database "DB_Unused2(1)" is written to, but is never used in a rule
+DB_Unused2(1);
+
+ENDEXITSECTION
+// ERR! [08] Parent goal of "testbench" could not be resolved: "Nonexistent"
+ParentTargetEdge "Nonexistent"

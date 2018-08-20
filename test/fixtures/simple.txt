@@ -1,0 +1,40 @@
+Version 1
+SubGoalCombiner SGC_AND
+INITSECTION
+  DB_MY_Test((TRIGGERGUID)TRIGGERGUID_S_MY_TriggerName_000_f2b9bdc9-0369-4cc3-81ed-ad85e2c423b2, "Test");
+KBSECTION
+  IF
+    RegionStarted("MyRegion")
+  THEN
+    GoalCompleted;
+
+  PROC
+    Proc_My_TestProc((INTEGER)_Value)
+  AND
+    DB_MY_TestValue((INTEGER)_OldValue)
+  AND
+    _OldValue < _Value
+  THEN
+    NOT DB_MY_TestValue(_OldValue);
+    
+  PROC
+    Proc_My_TestProc((INTEGER)_Value)
+  THEN
+    DB_MY_TestValue(_Value);
+
+  QRY
+    Qry_My_HasTestValue()
+  AND
+    DB_MY_TestValue((INTEGER)_Value)
+  THEN
+    DB_NOOP(1);
+
+  QRY
+    Qry_My_IsTestValue((INTEGER)_Value)
+  AND
+    DB_MY_TestValue(_Value)
+  THEN
+    DB_NOOP(1);
+EXITSECTION
+ENDEXITSECTION
+ParentTargetEdge "__Start"

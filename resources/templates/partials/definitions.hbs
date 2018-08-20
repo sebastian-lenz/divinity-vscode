@@ -1,0 +1,13 @@
+{{#each symbols}}
+  <p><strong>{{ title }}</strong></p>
+  <div class="divinityCompactList">
+    {{#each symbols}}
+    <div class="divinityCompactList--item">
+      <span class="divinityLink" data-goto="/definition/{{ name }}">
+        <span class="divinityIcon {{ type }}"></span>
+        <span class="divinitySymbolName">{{ name }}</span>
+      </span>
+    </div>
+    {{/each}}
+  </div>
+{{/each}}

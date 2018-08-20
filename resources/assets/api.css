@@ -1,0 +1,204 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+h1 {
+  font-weight: normal;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 1em 0 0.5em 0;
+
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+
+  font-size: 1.5em;
+  font-weight: normal;
+}
+
+a {
+  color: var(--color);
+}
+
+p,
+li {
+  line-height: 1.5em;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+.divinitySection {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.divinityIcon {
+  display: inline-block;
+  height: 14px;
+  width: 16px;
+  margin-top: -1px;
+
+  background-image: url("../icons/category-light.svg");
+  background-repeat: no-repeat;
+
+  vertical-align: middle;
+}
+
+.divinityIcon.large {
+  height: 21px;
+  width: 24px;
+  margin-top: -6px;
+}
+
+.vscode-dark .divinityIcon {
+  background-image: url("../icons/category-dark.svg");
+}
+
+.divinityIcon.call {
+  background-image: url("../icons/call-light.svg");
+}
+
+.vscode-dark .divinityIcon.call {
+  background-image: url("../icons/call-dark.svg");
+}
+
+.divinityIcon.event {
+  background-image: url("../icons/event-light.svg");
+}
+
+.vscode-dark .divinityIcon.event {
+  background-image: url("../icons/event-dark.svg");
+}
+
+.divinityIcon.query {
+  background-image: url("../icons/query-light.svg");
+}
+
+.vscode-dark .divinityIcon.query {
+  background-image: url("../icons/query-dark.svg");
+}
+
+.divinityLink {
+  cursor: pointer;
+}
+
+.divinityLink:hover {
+  text-decoration: underline;
+}
+
+.divinityBreadcrumb {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.divinityBreadcrumb--item:after {
+  content: "⮞";
+  margin: -1px 8px 0;
+
+  font-size: 75%;
+}
+
+.divinityBreadcrumb + h1 {
+  margin-top: 2px;
+}
+
+@media (min-width: 500px) {
+  .divinityCompactList {
+    columns: 2;
+  }
+}
+
+@media (min-width: 750px) {
+  .divinityCompactList {
+    columns: 3;
+  }
+}
+
+.divinityCompactList--item {
+  overflow: hidden;
+  box-sizing: border-box;
+
+  padding: 3px 20px 3px 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  break-inside: avoid-column;
+}
+
+pre,
+.divinitySignatutes {
+  padding: 10px;
+  overflow: auto;
+
+  border-radius: 3px;
+  background: var(--vscode-editorSuggestWidget-background);
+
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.divinitySignatutes--item:not(:first-child) {
+  margin-top: 0.5em;
+}
+
+.mtk12 {
+  color: var(--vscode-gitDecoration-conflictingResourceForeground);
+}
+
+.mtk11 {
+  color: var(--vscode-list-warningForeground);
+}
+
+.mtk13 {
+  color: var(--vscode-list-highlightForeground);
+}
+
+.divinityProgress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+}
+
+.divinityProgress--line {
+  position: absolute;
+  height: 100%;
+
+  background: var(--vscode-activityBarBadge-background);
+}
+
+.divinityProgress--line.inc {
+  animation: increase 2s infinite;
+}
+
+.divinityProgress--line.dec {
+  animation: decrease 2s 0.5s infinite;
+}
+
+@keyframes increase {
+  from {
+    left: -5%;
+    width: 5%;
+  }
+  to {
+    left: 130%;
+    width: 100%;
+  }
+}
+@keyframes decrease {
+  from {
+    left: -80%;
+    width: 80%;
+  }
+  to {
+    left: 110%;
+    width: 10%;
+  }
+}

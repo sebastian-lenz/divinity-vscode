@@ -67,6 +67,8 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
     story.symbols.update();
 
     if (!story.isInitializing) {
+      // Set the parser errors silently so analyzers can see them
+      this.diagnostics = diagnostics;
       this.setAllDiagnostics([
         ...diagnostics,
         ...(await story.analyzers.apply(this, node))

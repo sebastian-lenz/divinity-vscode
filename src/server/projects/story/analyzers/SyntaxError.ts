@@ -10,8 +10,8 @@ export default class SyntaxErrorAnalyzer extends SyncAnalyzer {
     const { endOffset, startOffset } = node;
     const diagnostics = resource.getDiagnostics();
     for (const diagnostic of diagnostics) {
-      if (diagnostic.startOffset < endOffset) continue;
-      if (diagnostic.endOffset > startOffset) continue;
+      if (diagnostic.startOffset > endOffset) continue;
+      if (diagnostic.endOffset < startOffset) continue;
       return true;
     }
 

@@ -38,13 +38,12 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "Divinity Engine configuration",
+      "title": "Divinity Engine Script configuration",
       "properties": {
-        "divinityScript.autoStart": {
+        "divinity.compilerPath": {
           "scope": "window",
-          "type": "boolean",
-          "default": false,
-          "description": "When enabled, the language support will start automatically. Otherwise it will start when opening an Osiris script file."
+          "type": "string",
+          "description": "Set the path to the custom compiler."
         }
       }
     },

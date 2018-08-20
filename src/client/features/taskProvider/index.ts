@@ -1,4 +1,5 @@
 import { join, normalize } from "path";
+import { existsSync } from "fs";
 import {
   ProgressLocation,
   ShellExecution,
@@ -18,7 +19,6 @@ import {
 
 import Client from "../../Client";
 import Feature from "../Feature";
-import getPackagePath from "../../../shared/getPackagePath";
 import {
   projectAddedEvent,
   ProjectInfo,
@@ -72,18 +72,35 @@ export default class TaskProviderFeature extends Feature
     workspace.registerTaskProvider(compilerTaskType, this);
   }
 
-  getCompilerPath(): string {
-    return join(getPackagePath(), "bin", "StoryCompiler.exe");
+  getPath(fileName: string) {
+    // const path = join(getPackagePath(), "bin", fileName);
+    const compilerPath = workspace
+      .getConfiguration("divinity")
+      .get<string>("compilerPath");
+
+    if (!compilerPath) return undefined;
+    const path = join(compilerPath, fileName);
+
+    return existsSync(path) ? path : undefined;
   }
 
-  getRconPath(): string {
-    return join(getPackagePath(), "bin", "RconClient.exe");
+  getCompilerPath(): string | undefined {
+    return this.getPath("StoryCompiler.exe");
+  }
+
+  getRconPath(): string | undefined {
+    return this.getPath("RconClient.exe");
   }
 
   handleProjectAdded = ({ project }: ProjectEventArgs) => {
     const { projects } = this;
     const tasks: Array<Task> = [];
     projects.push(project);
+
+    if (!this.getCompilerPath()) {
+      this.tasks = tasks;
+      return;
+    }
 
     for (const project of projects) {
       for (const [caption, mode] of modes) {
@@ -121,7 +138,8 @@ export default class TaskProviderFeature extends Feature
     }
 
     const { reload } = definition as DivinityTaskDefinition;
-    if (reload && scope && event.exitCode === 0) {
+    const rconPath = this.getRconPath();
+    if (rconPath && reload && scope && event.exitCode === 0) {
       const task = new Task(
         {
           type: reloadTaskType
@@ -129,10 +147,7 @@ export default class TaskProviderFeature extends Feature
         scope,
         reloadTaskTitle,
         taskTitle,
-        new ShellExecution(quotedString(this.getRconPath()), [
-          "127.0.0.1:5384",
-          reload
-        ])
+        new ShellExecution(quotedString(rconPath), ["127.0.0.1:5384", reload])
       );
 
       task.presentationOptions = {
@@ -178,7 +193,8 @@ export default class TaskProviderFeature extends Feature
 
   resolveTask(task: Task): Task | undefined {
     const { definition } = task;
-    if (definition.type !== compilerTaskType) {
+    const compilerPath = this.getCompilerPath();
+    if (!compilerPath || definition.type !== compilerTaskType) {
       return undefined;
     }
 
@@ -216,11 +232,7 @@ export default class TaskProviderFeature extends Feature
       args.push("--check-names");
     }
 
-    task.execution = new ShellExecution(
-      quotedString(this.getCompilerPath()),
-      args
-    );
-
+    task.execution = new ShellExecution(quotedString(compilerPath), args);
     return task;
   }
 }

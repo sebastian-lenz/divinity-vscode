@@ -438,6 +438,7 @@ export default class Lexer {
           offset += 1;
           character += 1;
         } else {
+          value[valueOffset++] = char;
           type = TokenType.Invalid;
           break;
         }
@@ -455,6 +456,7 @@ export default class Lexer {
           type = TokenType.Operator;
           break;
         } else {
+          value[valueOffset++] = char;
           type = TokenType.Invalid;
           break;
         }
@@ -462,6 +464,7 @@ export default class Lexer {
         value[valueOffset++] = char;
         type = TokenType.Identifier;
       } else {
+        value[valueOffset++] = char;
         type = TokenType.Invalid;
         break;
       }

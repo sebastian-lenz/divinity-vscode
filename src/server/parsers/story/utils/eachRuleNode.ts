@@ -72,6 +72,8 @@ export default function* eachRuleNode(rule: RuleNode): Iterable<EachRuleNode> {
     }
   }
 
+  scope.variablesBefore = scope.variables;
+
   if (rule.body) {
     for (const node of rule.body.actions) {
       yield {

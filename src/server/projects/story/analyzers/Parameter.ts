@@ -267,6 +267,8 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
       } else {
         flow = variable ? ParameterFlow.In : ParameterFlow.Out;
       }
+    } else {
+      allowPlaceholders = flow === ParameterFlow.Out;
     }
 
     // Bail out for placeholders

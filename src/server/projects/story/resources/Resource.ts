@@ -159,7 +159,6 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   setIsDeleted(isDeleted: boolean) {
     if (this.isDeleted === isDeleted) return;
     this.isDeleted = isDeleted;
-    this.story.updateTree();
   }
 
   async validate() {

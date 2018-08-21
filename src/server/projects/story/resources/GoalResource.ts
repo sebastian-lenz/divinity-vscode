@@ -82,4 +82,15 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
 
     return node;
   }
+
+  setIsDeleted(isDeleted: boolean) {
+    if (this.isDeleted === isDeleted) return;
+    super.setIsDeleted(isDeleted);
+
+    if (isDeleted) {
+      this.story.removeGoal(this.goal);
+    } else {
+      this.story.addGoal(this.goal);
+    }
+  }
 }

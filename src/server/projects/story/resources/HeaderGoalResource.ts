@@ -77,4 +77,15 @@ export default class HeaderGoalResource extends Resource<StoryGoalNode> {
 
     return node;
   }
+
+  setIsDeleted(isDeleted: boolean) {
+    if (this.isDeleted === isDeleted) return;
+    super.setIsDeleted(isDeleted);
+
+    if (isDeleted) {
+      this.story.removeGoal(this.goal);
+    } else {
+      this.story.addGoal(this.goal);
+    }
+  }
 }

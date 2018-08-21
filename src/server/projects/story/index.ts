@@ -44,7 +44,15 @@ export default class Story {
 
   addGoal(goal: Goal) {
     this.removeGoalByName(goal.name);
-    this.goals.push(goal);
+
+    const { goals } = this;
+    goals.push(goal);
+
+    for (const goal of goals) {
+      if (goal.parents.indexOf(goal.name) !== -1) {
+        goal.resource.invalidate();
+      }
+    }
 
     this.updateTree();
   }
@@ -73,7 +81,10 @@ export default class Story {
   }
 
   findGoal(name: string): Goal | null {
-    return this.goals.find(goal => goal.name === name) || null;
+    return (
+      this.goals.find(goal => goal.name === name && !goal.resource.isDeleted) ||
+      null
+    );
   }
 
   findOrCreateResource(path: string): FileResource | null {

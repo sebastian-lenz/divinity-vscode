@@ -66,6 +66,7 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
     goal.setParents(
       parents ? parents.map(parentEdge => parentEdge.name.value) : []
     );
+
     story.symbols.update();
 
     if (!story.isInitializing) {

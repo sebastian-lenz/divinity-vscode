@@ -20,6 +20,7 @@ export interface ResourceOptions {
 
 export default abstract class Resource<T extends AnyNode = AnyNode> {
   isDeleted: boolean = false;
+  isInvalid: boolean = false;
   readonly story: Story;
 
   protected diagnostics: Array<Diagnostic> = [];
@@ -28,6 +29,7 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
 
   constructor(options: ResourceOptions) {
     this.load = this.load.bind(this);
+    this.validate = this.validate.bind(this);
     this.story = options.story;
   }
 
@@ -56,6 +58,7 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
       this.rootNode = rootNode;
     }
 
+    this.isInvalid = false;
     return rootNode;
   }
 
@@ -115,7 +118,9 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   }
 
   invalidate() {
-    this.story.queue.add(this.load);
+    if (this.isInvalid) return;
+    this.isInvalid = true;
+    this.story.queue.add(this.validate);
   }
 
   protected setAllDiagnostics(diagnostics: Array<Diagnostic>) {
@@ -151,5 +156,10 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
     if (this.isDeleted === isDeleted) return;
     this.isDeleted = isDeleted;
     this.story.updateTree();
+  }
+
+  async validate() {
+    if (!this.isInvalid) return;
+    return this.load();
   }
 }

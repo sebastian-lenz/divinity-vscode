@@ -61,11 +61,7 @@ export default class Story {
 
   async analyzeGoals() {
     for (const resource of this.resources) {
-      if (
-        resource instanceof GoalResource &&
-        !resource.isDeleted &&
-        resource.getDocument()
-      ) {
+      if (resource instanceof GoalResource && !resource.isDeleted) {
         await resource.analyze();
       }
     }
@@ -276,9 +272,9 @@ export default class Story {
       await symbols.loadMetaData();
       symbols.update();
 
-      await this.analyzeGoals();
-
       project.projects.emit("projectReady", this.project);
+
+      await this.analyzeGoals();
       project.levels.initialize();
     }
   };

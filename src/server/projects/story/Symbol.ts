@@ -1,3 +1,5 @@
+import didParametersChange from "./utils/didParametersChange";
+import getAnnotatedType from "./utils/getAnnotatedType";
 import getCallerSymbolType from "./utils/getCallerSymbolType";
 import getDefinitionSymbolType from "./utils/getDefinitionSymbolType";
 import getParameterNameScore from "./utils/getParameterNameScore";
@@ -25,7 +27,6 @@ import {
   DefinitionNode,
   ParameterFlow
 } from "../../parsers/story/models/nodes";
-import getAnnotatedType from "./utils/getAnnotatedType";
 
 function compareDefinition(left: SymbolDefinition, right: SymbolDefinition) {
   if (left.goal.weight === right.goal.weight) {
@@ -130,13 +131,43 @@ export default class Symbol {
     }
   }
 
+  addDatabaseAccess(goal: Goal, node: CallerNode) {
+    let { dbReads, dbWrites } = this;
+
+    if (
+      (node.type === NodeType.Rule ||
+        node.type === NodeType.SignatureCondition) &&
+      (!dbReads || dbReads.indexOf(goal) === -1)
+    ) {
+      if (!dbReads) {
+        this.invalidateUsage();
+        dbReads = this.dbReads = [];
+      }
+
+      dbReads.push(goal);
+    }
+
+    if (
+      node.type === NodeType.SignatureAction &&
+      !node.isInverted &&
+      (!dbWrites || dbWrites.indexOf(goal) === -1)
+    ) {
+      if (!dbWrites) {
+        this.invalidateUsage();
+        dbWrites = this.dbWrites = [];
+      }
+
+      dbWrites.push(goal);
+    }
+  }
+
   addReference(
     goal: Goal,
     node: CallerNode,
     type: EachCallerType,
     variables?: Array<Variable>
   ) {
-    const { definitions, parameterNames, usages, dbReads, dbWrites } = this;
+    const { definitions, parameterNames, usages } = this;
     const { identifierType } = node.signature.identifier;
     const isDefinition =
       !this.isSystem &&
@@ -147,22 +178,8 @@ export default class Symbol {
       usages.push(goal);
     }
 
-    if (
-      identifierType === IdentifierType.Database &&
-      (node.type === NodeType.Rule ||
-        node.type === NodeType.SignatureCondition) &&
-      (!dbReads || dbReads.indexOf(goal) === -1)
-    ) {
-      (dbReads || (this.dbReads = [])).push(goal);
-    }
-
-    if (
-      identifierType === IdentifierType.Database &&
-      node.type === NodeType.SignatureAction &&
-      !node.isInverted &&
-      (!dbWrites || dbWrites.indexOf(goal) === -1)
-    ) {
-      (dbWrites || (this.dbWrites = [])).push(goal);
+    if (identifierType === IdentifierType.Database) {
+      this.addDatabaseAccess(goal, node);
     }
 
     const { parameters } = node.signature;
@@ -202,6 +219,12 @@ export default class Symbol {
       ({ goal, isInferred, isPartial }) =>
         goal === target && !isInferred && !isPartial
     );
+  }
+
+  invalidateUsage() {
+    for (const usage of this.usages) {
+      usage.resource.invalidate();
+    }
   }
 
   isDefinedBy(goal: Goal): boolean {
@@ -265,6 +288,7 @@ export default class Symbol {
 
     this.parameters = parameters;
     this.resolvedDefinition = null;
+    this.invalidateUsage();
   }
 
   toSystemSymbol(definition: DefinitionNode) {
@@ -289,6 +313,10 @@ export default class Symbol {
     for (const definition of definitions) {
       const parameters = resolveParameters(this, definition);
       if (Array.isArray(parameters)) {
+        if (didParametersChange(this.parameters, parameters)) {
+          this.invalidateUsage();
+        }
+
         this.isDead = false;
         this.needsUpdate = false;
         this.parameters = parameters;

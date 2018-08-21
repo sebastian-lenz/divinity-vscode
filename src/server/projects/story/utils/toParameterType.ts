@@ -1,6 +1,6 @@
 import { ParameterType } from "../models/parameter";
 
-export default function toParameterType(value?: string): ParameterType {
+export default function toParameterType(value: string | null): ParameterType {
   switch (value ? value.toUpperCase() : undefined) {
     case "INTEGER":
       return ParameterType.Integer;

@@ -1,7 +1,7 @@
 export interface TemplateOptions {
-  exit?: string;
-  init?: string;
-  kb?: string;
+  exit?: string | null;
+  init?: string | null;
+  kb?: string | null;
   parents?: Array<string>;
   subGoalCombiner?: string;
   version?: number;

@@ -2,6 +2,7 @@ import msgInvalidToken from "./messages/msgInvalidToken";
 import msgNewLineInString from "./messages/msgNewLineInString";
 import msgPrematureRealEnd from "./messages/msgPrematureRealEnd";
 import packPosition from "./utils/packPosition";
+import { Region } from "./models/nodes";
 
 import {
   DiagnosticType,
@@ -147,7 +148,8 @@ export default class Lexer {
   lastComment: string | null = null;
   line: number = 0;
   offset: number = 0;
-  region: string | null = null;
+  regionId: number = -1;
+  regions: Array<Region> = [];
   private tokenBuffer: Array<Token>;
 
   constructor(source: string) {
@@ -172,12 +174,8 @@ export default class Lexer {
     }
   }
 
-  addDiagnostic(
-    range: TokenRange | undefined = undefined,
-    message: DiagnosticMessage
-  ) {
+  addDiagnostic(range: TokenRange | null = null, message: DiagnosticMessage) {
     range = range || this.last() || this.peak();
-
     if (range) {
       this.diagnostics.push({
         ...message,
@@ -190,21 +188,34 @@ export default class Lexer {
     }
   }
 
-  last(): Token | undefined {
+  endRegion(token: Token) {
+    if (this.regionId === -1) return;
+    const region = this.regions[this.regionId];
+    region.endOffset = token.endOffset;
+    region.endOffset = token.endOffset;
+
+    this.regionId = -1;
+  }
+
+  getRegion(): Region | null {
+    return this.regionId === -1 ? null : this.regions[this.regionId];
+  }
+
+  last(): Token | null {
     const { tokenBuffer } = this;
     const result = tokenBuffer[NUM_TOKENS - 1];
 
     return result.type === TokenType.EndOfFile ||
       result.type === TokenType.Empty
-      ? undefined
+      ? null
       : result;
   }
 
-  next(): Token | undefined {
+  next(): Token | null {
     const { tokenBuffer } = this;
     const result = tokenBuffer[0];
     if (result.type === TokenType.EndOfFile) {
-      return undefined;
+      return null;
     }
 
     for (let index = 1; index < NUM_TOKENS; index++) {
@@ -223,7 +234,7 @@ export default class Lexer {
     return result;
   }
 
-  peak(offset: number = 0): Token | undefined {
+  peak(offset: number = 0): Token | null {
     if (offset > NUM_TOKENS - 2) {
       throw new Error("Invalid peak offset.");
     }
@@ -231,16 +242,27 @@ export default class Lexer {
     const { tokenBuffer } = this;
     for (let index = 0; index <= offset; index++) {
       if (tokenBuffer[index].type === TokenType.EndOfFile) {
-        return undefined;
+        return null;
       }
     }
 
     return tokenBuffer[offset];
   }
 
+  startRegion(token: Token, name: string) {
+    this.regionId = this.regions.length;
+    this.regions.push({
+      endOffset: token.endOffset,
+      endPosition: token.endPosition,
+      name,
+      startOffset: token.startOffset,
+      startPosition: token.startPosition
+    });
+  }
+
   tokenize() {
     const result: Array<Token> = [];
-    let token: Token | undefined;
+    let token: Token | null;
     while ((token = this.next())) {
       result.push({
         ...token,
@@ -512,12 +534,17 @@ export default class Lexer {
       token.type === TokenType.LineComment &&
       stringValue.startsWith("//REGION")
     ) {
-      this.region = stringValue.substr(8).trim();
+      this.startRegion(token, stringValue.substr(8).trim());
     } else if (
-      token.type === TokenType.LineComment &&
-      stringValue.startsWith("//END_REGION")
+      (token.type === TokenType.LineComment &&
+        stringValue.startsWith("//END_REGION")) ||
+      token.type === TokenType.EndExitSectionKeyword ||
+      token.type === TokenType.ExitSectionKeyword ||
+      token.type === TokenType.InitSectionKeyword ||
+      token.type === TokenType.KBSectionKeyword ||
+      token.type === TokenType.EndOfFile
     ) {
-      this.region = null;
+      this.endRegion(token);
     } else if (
       token.type === TokenType.BlockComment ||
       token.type === TokenType.LineComment

@@ -25,11 +25,11 @@ export default function resolveParameters(
     const name = names[index].name;
 
     if (type !== ParameterType.Unknown) {
-      resolved.push({ flow, name, type });
+      resolved.push({ flow, fromIndex: null, fromSymbol: null, name, type });
       continue;
     }
 
-    if (fromSymbol && fromIndex !== undefined) {
+    if (fromSymbol && fromIndex !== null) {
       if (fromSymbol.isDead) {
         return ResolvePrameterResult.Dead;
       } else if (fromSymbol.needsUpdate) {
@@ -55,7 +55,7 @@ export default function resolveParameters(
         }
       }
 
-      resolved.push({ flow, name, type });
+      resolved.push({ flow, fromIndex, fromSymbol, name, type });
       continue;
     }
 

@@ -19,18 +19,24 @@ export interface ParserResult {
 
 export default class GoalParser extends ParserBase {
   parse(): ParserResult {
-    let storyToken: StoryToken | undefined;
+    let storyToken: StoryToken | null;
     const goal: StoryGoalNode = {
       endOffset: 0,
       endPosition: 0,
+      exit: null,
+      init: null,
+      kb: null,
+      parentTargetEdges: [],
+      subGoalCombiner: null,
       startOffset: 0,
       startPosition: 0,
-      type: NodeType.StoryGoal
+      type: NodeType.StoryGoal,
+      version: null
     };
 
     this.withBailOutTypes(storyTokenTypes, () => {
       do {
-        switch (storyToken ? storyToken.type : undefined) {
+        switch (storyToken ? storyToken.type : null) {
           case TokenType.InitSectionKeyword:
             storyToken = this.readStoryInit(goal);
             break;
@@ -70,11 +76,8 @@ export default class GoalParser extends ParserBase {
     }
   );
 
-  readStoryOptions(
-    goal: StoryGoalNode,
-    isHeader: boolean
-  ): StoryToken | undefined {
-    let token: Token | undefined;
+  readStoryOptions(goal: StoryGoalNode, isHeader: boolean): StoryToken | null {
+    let token: Token | null;
 
     while ((token = this.next())) {
       if (isStoryToken(token)) {
@@ -91,11 +94,11 @@ export default class GoalParser extends ParserBase {
       }
     }
 
-    return undefined;
+    return null;
   }
 
   readStoryOption(goal: StoryGoalNode, token: Token, isHeader: boolean) {
-    let valueToken: Token | undefined;
+    let valueToken: Token | null;
     const headerCheck = (target: boolean) =>
       target !== isHeader
         ? this.addDiagnostic(
@@ -166,12 +169,12 @@ export default class GoalParser extends ParserBase {
   withStoryBoundary(
     boundaryType: TokenType,
     callback: {
-      (goal: StoryGoalNode): AnyNode | undefined;
+      (goal: StoryGoalNode): AnyNode | null;
     }
   ) {
-    return (goal: StoryGoalNode): StoryToken | undefined => {
+    return (goal: StoryGoalNode): StoryToken | null => {
       const last = this.last();
-      let node: AnyNode | undefined;
+      let node: AnyNode | null;
       if (last) {
         const startOffset = last.startOffset;
         const startPosition = last.startPosition;

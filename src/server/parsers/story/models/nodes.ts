@@ -39,6 +39,10 @@ export const enum IdentifierType {
   Variable
 }
 
+export interface Region extends TokenRange {
+  name: string;
+}
+
 export type AnyNode =
   | ActionBlockNode
   | ConditionBlockNode
@@ -64,9 +68,9 @@ export interface AbstractNode extends TokenRange {
 }
 
 export interface AbstractGoalNode extends AbstractNode {
-  exit?: ActionBlockNode;
-  init?: ActionBlockNode;
-  kb?: RuleBlockNode;
+  exit: ActionBlockNode | null;
+  init: ActionBlockNode | null;
+  kb: RuleBlockNode | null;
 }
 
 export interface ActionBlockNode extends AbstractNode {
@@ -87,12 +91,12 @@ export interface HeaderNode extends AbstractNode {
 }
 
 export interface HeaderGoalNode extends AbstractNode {
-  exit?: string;
+  exit: string | null;
   id: number;
-  init?: string;
-  kb?: string;
+  init: string | null;
+  kb: string | null;
   subGoal: Array<number>;
-  title?: string;
+  title: string | null;
   type: NodeType.DivGoal;
 }
 
@@ -126,28 +130,28 @@ export interface NumericLiteralNode extends AbstractNode {
 export interface OperatorNode extends AbstractNode {
   isInverted: boolean;
   leftOperant: ArgumentNode;
-  leftType: TypeAnnotationNode | undefined;
+  leftType: TypeAnnotationNode | null;
   operator: string;
   rightOperant: ArgumentNode;
-  rightType: TypeAnnotationNode | undefined;
+  rightType: TypeAnnotationNode | null;
   type: NodeType.OperatorCondition;
 }
 
 export interface ParameterNode extends AbstractNode {
   argument: ArgumentNode;
-  flow?: ParameterFlow;
+  flow: ParameterFlow | null;
   type: NodeType.Parameter;
-  valueType?: TypeAnnotationNode;
+  valueType: TypeAnnotationNode | null;
 }
 
 export interface RuleNode extends AbstractNode {
-  body?: ActionBlockNode;
+  body: ActionBlockNode | null;
   comment: string | null;
-  conditions?: ConditionBlockNode;
-  region: string | null;
+  conditions: ConditionBlockNode | null;
+  region: Region | null;
   ruleType: "IF" | "PROC" | "QRY";
   signature: SignatureNode;
-  symbol?: Symbol;
+  symbol: Symbol | null;
   type: NodeType.Rule;
 }
 
@@ -159,7 +163,7 @@ export interface RuleBlockNode extends AbstractNode {
 export interface SignatureCallNode extends AbstractNode {
   isInverted: boolean;
   signature: SignatureNode;
-  symbol?: Symbol;
+  symbol: Symbol | null;
   type: NodeType.SignatureAction | NodeType.SignatureCondition;
 }
 
@@ -170,10 +174,10 @@ export interface SignatureNode extends AbstractNode {
 }
 
 export interface StoryGoalNode extends AbstractGoalNode {
-  parentTargetEdges?: Array<StringLiteralNode>;
-  subGoalCombiner?: string;
+  parentTargetEdges: Array<StringLiteralNode>;
+  subGoalCombiner: string | null;
   type: NodeType.StoryGoal;
-  version?: number;
+  version: number | null;
 }
 
 export interface StringLiteralNode extends AbstractNode {
@@ -182,6 +186,6 @@ export interface StringLiteralNode extends AbstractNode {
 }
 
 export interface TypeAnnotationNode extends AbstractNode {
-  annotatedType?: string;
+  annotatedType: string | null;
   type: NodeType.TypeAnnotation;
 }

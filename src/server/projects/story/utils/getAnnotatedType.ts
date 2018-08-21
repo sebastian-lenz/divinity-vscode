@@ -3,7 +3,7 @@ import { ParameterType } from "../models/parameter";
 import toParameterType from "./toParameterType";
 
 export default function getAnnotatedType(
-  node?: TypeAnnotationNode
+  node: TypeAnnotationNode | null
 ): ParameterType | null {
   if (!node || !node.annotatedType) {
     return null;

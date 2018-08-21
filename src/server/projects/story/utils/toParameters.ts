@@ -62,6 +62,8 @@ export default function toParameters(
 
     parameters.push({
       flow,
+      fromIndex: null,
+      fromSymbol: null,
       name,
       type
     });

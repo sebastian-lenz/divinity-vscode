@@ -69,7 +69,13 @@ export default class Symbol {
     for (let index = 0; index < numParameters; index++) {
       const name = `_Param${index + 1}`;
       parameterNames.push({ name, score: 0 });
-      parameters.push({ name, type: ParameterType.Unknown });
+      parameters.push({
+        flow: null,
+        fromIndex: null,
+        fromSymbol: null,
+        name,
+        type: ParameterType.Unknown
+      });
     }
 
     this.name = name;
@@ -249,6 +255,9 @@ export default class Symbol {
 
     for (let index = 0; index < numParameters; index++) {
       parameters.push({
+        flow: null,
+        fromIndex: null,
+        fromSymbol: null,
         name: parameterNames[index].name,
         type: ParameterType.Unknown
       });

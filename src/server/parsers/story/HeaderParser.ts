@@ -62,7 +62,7 @@ export interface ParserResult {
 
 export default class HeaderParser extends ParserBase {
   parse(): ParserResult {
-    let token: Token | undefined;
+    let token: Token | null;
     const header: HeaderNode = {
       definitions: [],
       endOffset: 0,
@@ -108,19 +108,19 @@ export default class HeaderParser extends ParserBase {
     this.consumeIncluding(TokenType.CurlyBracketClose);
   }
 
-  readDefinition(token: Token): DefinitionNode | undefined {
+  readDefinition(token: Token): DefinitionNode | null {
     const startOffset = token.startOffset;
     const startPosition = token.startPosition;
     const definitionType = token.value;
     const signature = this.readSignature();
 
-    if (!signature) return undefined;
+    if (!signature) return null;
 
     if (this.consume(TokenType.BracketOpen)) {
       this.consumeIncluding(TokenType.BracketClose);
     } else {
       this.addDiagnostic(
-        undefined,
+        null,
         msgUnexpectedToken({
           actualToken: this.last(),
           expectedHint: "definitionMetaData"
@@ -139,20 +139,20 @@ export default class HeaderParser extends ParserBase {
     };
   }
 
-  readGoal(header: HeaderNode): undefined {
+  readGoal(header: HeaderNode): null {
     if (!this.consume(TokenType.BracketOpen)) {
-      return undefined;
+      return null;
     }
 
     const idToken = this.read(TokenType.IntegerLiteral);
     if (!idToken) {
       this.consumeIncluding(TokenType.BracketClose);
-      return undefined;
+      return null;
     }
 
     const id = parseInt(idToken.value);
     if (!this.consume(TokenType.BracketClose)) {
-      return undefined;
+      return null;
     }
 
     let goal = header.goals.find(goal => goal.id === id);
@@ -160,10 +160,14 @@ export default class HeaderParser extends ParserBase {
       goal = {
         endOffset: 0,
         endPosition: 0,
+        exit: null,
         id,
+        init: null,
+        kb: null,
         startPosition: 0,
         startOffset: 0,
         subGoal: [],
+        title: null,
         type: NodeType.DivGoal
       };
       header.goals.push(goal);
@@ -176,11 +180,11 @@ export default class HeaderParser extends ParserBase {
       this.readGoalContent(goal);
     }
 
-    return undefined;
+    return null;
   }
 
   readGoalContent(goal: HeaderGoalNode) {
-    let token: Token | undefined;
+    let token: Token | null;
 
     while ((token = this.next())) {
       if (token.type === TokenType.CurlyBracketClose) {

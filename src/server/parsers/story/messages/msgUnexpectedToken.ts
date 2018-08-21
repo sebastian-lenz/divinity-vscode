@@ -20,9 +20,9 @@ const hints = {
 export type UnexpectedTokenHint = keyof typeof hints;
 
 export type Params = {
-  actualToken?: Token | TokenType;
-  expectedHint?: UnexpectedTokenHint;
-  expectedToken?: TokenType | Array<TokenType>;
+  actualToken?: Token | TokenType | null;
+  expectedHint?: UnexpectedTokenHint | null;
+  expectedToken?: TokenType | Array<TokenType> | null;
 };
 
 export default function msgUnexpectedToken({

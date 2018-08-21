@@ -337,7 +337,7 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
   resolveArgumentType(
     scope: Scope | ParameterType | null,
     argument: ArgumentNode,
-    typeAnnotation?: TypeAnnotationNode
+    typeAnnotation: TypeAnnotationNode | null
   ): ParameterType {
     const argumentType = getArgumentType(argument, scope);
     let result = argumentType;

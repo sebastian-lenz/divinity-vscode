@@ -64,7 +64,7 @@ export default class Parser extends Lexer {
   consumeUntil(...types: Array<TokenType>): boolean {
     const { bailOutTypes } = this;
 
-    let token: Token | undefined;
+    let token: Token | null;
     while ((token = this.peak())) {
       if (bailOutTypes.indexOf(token.type) !== -1) {
         return false;
@@ -89,7 +89,7 @@ export default class Parser extends Lexer {
     return result;
   }
 
-  ensureSemiColon(lastToken: Token | undefined = undefined) {
+  ensureSemiColon(lastToken: Token | null = null) {
     const nextToken = this.peak();
 
     if (nextToken && nextToken.type === TokenType.SemiColon) {
@@ -106,12 +106,12 @@ export default class Parser extends Lexer {
   }
 
   injectRange<T extends AbstractNode>(callback: {
-    (): WithoutRange<T> | undefined;
-  }): { (): T | undefined } {
+    (): WithoutRange<T> | null;
+  }): { (): T | null } {
     return () => {
       const first = this.peak();
       if (!first) {
-        return undefined;
+        return null;
       }
 
       const startOffset = first.startOffset;
@@ -121,7 +121,7 @@ export default class Parser extends Lexer {
       if (result) {
         const last = this.last();
         if (!last) {
-          return undefined;
+          return null;
         }
 
         result.endOffset = last.endOffset;
@@ -142,7 +142,7 @@ export default class Parser extends Lexer {
     type: TokenType | Array<TokenType>,
     error?: boolean,
     hint?: UnexpectedTokenHint
-  ): Token | undefined {
+  ): Token | null {
     const token = this.peak();
     if (
       token &&
@@ -165,12 +165,12 @@ export default class Parser extends Lexer {
       );
     }
 
-    return undefined;
+    return null;
   }
 
-  readAction(): ActionNode | undefined {
+  readAction(): ActionNode | null {
     const token = this.peak();
-    if (!token) return undefined;
+    if (!token) return null;
     if (token.type == TokenType.GoalCompletedKeyword) {
       const result: GoalCompletedNode = {
         endOffset: token.endOffset,
@@ -196,7 +196,7 @@ export default class Parser extends Lexer {
 
     const signature = this.readSignature();
     if (!signature) {
-      return undefined;
+      return null;
     }
 
     this.ensureSemiColon();
@@ -207,13 +207,14 @@ export default class Parser extends Lexer {
       signature,
       startOffset,
       startPosition,
+      symbol: null,
       type: NodeType.SignatureAction
     };
   }
 
   readActionBlock = this.injectRange<ActionBlockNode>(() => {
     const actions: Array<ActionNode> = [];
-    let token: Token | undefined;
+    let token: Token | null;
     let action;
 
     while ((token = this.peak())) {
@@ -254,7 +255,7 @@ export default class Parser extends Lexer {
 
   readConditionBlock = this.injectRange<ConditionBlockNode>(() => {
     const conditions: Array<ConditionNode> = [];
-    let token: Token | undefined;
+    let token: Token | null;
 
     while ((token = this.peak())) {
       if (this.isBailOutToken(token) || token.type === TokenType.ThenKeyword) {
@@ -286,7 +287,7 @@ export default class Parser extends Lexer {
     };
   });
 
-  readFloatLiteral(): NumericLiteralNode | undefined {
+  readFloatLiteral(): NumericLiteralNode | null {
     const token = this.read(TokenType.FloatLiteral);
     return token
       ? {
@@ -297,18 +298,18 @@ export default class Parser extends Lexer {
           type: NodeType.RealLiteral,
           value: parseFloat(token.value)
         }
-      : undefined;
+      : null;
   }
 
-  readGuidLiteral(): GuidLiteralNode | undefined {
+  readGuidLiteral(): GuidLiteralNode | null {
     const token = this.read(TokenType.GuidLiteral);
     if (!token) {
-      return undefined;
+      return null;
     }
 
     const match = GUID_REGEXP.exec(token.value);
     if (!match) {
-      return undefined;
+      return null;
     }
 
     return {
@@ -322,9 +323,9 @@ export default class Parser extends Lexer {
     };
   }
 
-  readIdentifier(hint?: UnexpectedTokenHint): IdentifierNode | undefined {
+  readIdentifier(hint?: UnexpectedTokenHint): IdentifierNode | null {
     const token = this.read(TokenType.Identifier, true, hint);
-    if (!token) return undefined;
+    if (!token) return null;
 
     let identifierType: IdentifierType = IdentifierType.Default;
     if (token.value.startsWith("DB_")) {
@@ -346,7 +347,7 @@ export default class Parser extends Lexer {
     };
   }
 
-  readIntegerLiteral(): NumericLiteralNode | undefined {
+  readIntegerLiteral(): NumericLiteralNode | null {
     const token = this.read(TokenType.IntegerLiteral);
     return token
       ? {
@@ -357,23 +358,23 @@ export default class Parser extends Lexer {
           value: parseInt(token.value),
           type: NodeType.IntegerLiteral
         }
-      : undefined;
+      : null;
   }
 
   readOperatorCondition(
     isInverted: boolean
-  ): WithoutRange<OperatorNode> | undefined {
+  ): WithoutRange<OperatorNode> | null {
     const leftType = this.tryReadTypeAnnoation();
     const leftOperant = this.tryReadArgument();
-    if (!leftOperant) return undefined;
+    if (!leftOperant) return null;
 
     const operatorToken = this.read(TokenType.Operator, true);
-    if (!operatorToken) return undefined;
+    if (!operatorToken) return null;
     const operator = operatorToken.value;
 
     const rightType = this.tryReadTypeAnnoation();
     const rightOperant = this.tryReadArgument();
-    if (!rightOperant) return undefined;
+    if (!rightOperant) return null;
 
     if (leftOperant && operatorToken && rightOperant) {
       return {
@@ -387,7 +388,7 @@ export default class Parser extends Lexer {
       };
     }
 
-    return undefined;
+    return null;
   }
 
   readParameter = this.injectRange<ParameterNode>(() => {
@@ -411,20 +412,23 @@ export default class Parser extends Lexer {
         expectedHint: "parameter"
       })
     );
-    return undefined;
+
+    return null;
   });
 
-  readParameters(thisParameter?: IdentifierNode): Array<ParameterNode> {
+  readParameters(thisParameter: IdentifierNode | null): Array<ParameterNode> {
     const result: Array<ParameterNode> = [];
 
     if (thisParameter) {
       result.push({
         endOffset: thisParameter.endOffset,
         endPosition: thisParameter.endPosition,
+        flow: null,
         startOffset: thisParameter.startOffset,
         startPosition: thisParameter.startPosition,
         argument: thisParameter,
-        type: NodeType.Parameter
+        type: NodeType.Parameter,
+        valueType: null
       });
     }
 
@@ -435,7 +439,7 @@ export default class Parser extends Lexer {
     let token = this.peak();
     if (!token) {
       this.addDiagnostic(
-        undefined,
+        null,
         msgUnexpectedToken({
           expectedHint: "parameterBlockStart"
         })
@@ -481,23 +485,23 @@ export default class Parser extends Lexer {
 
   readRule = this.injectRange<RuleNode>(() => {
     const ruleTypeToken = this.read(ruleTokenTypes);
-    if (!ruleTypeToken) return undefined;
+    if (!ruleTypeToken) return null;
     const comment = ruleTypeToken.comment;
-    const region = this.region;
+    const region = this.getRegion();
     const ruleType = ruleTypeToken.value as any;
 
     const signature = this.readSignature();
-    if (!signature) return undefined;
+    if (!signature) return null;
 
     const conditions = this.readConditionBlock();
-    if (!conditions) return undefined;
+    if (!conditions) return null;
 
     this.read(TokenType.ThenKeyword, true);
 
     const body = this.readActionBlock();
-    if (!body) return undefined;
+    if (!body) return null;
     if (body.actions.length === 0) {
-      this.addDiagnostic(undefined, msgEmptyRuleBody());
+      this.addDiagnostic(null, msgEmptyRuleBody());
     }
 
     return {
@@ -507,13 +511,14 @@ export default class Parser extends Lexer {
       ruleType,
       region,
       signature,
+      symbol: null,
       type: NodeType.Rule
     };
   });
 
   readRuleBlock = this.injectRange<RuleBlockNode>(() => {
     const rules: Array<RuleNode> = [];
-    let token: Token | undefined;
+    let token: Token | null;
 
     while ((token = this.peak())) {
       if (this.isBailOutToken(token)) {
@@ -558,10 +563,10 @@ export default class Parser extends Lexer {
   });
 
   readSignature = this.injectRange<SignatureNode>(() => {
-    let thisParamater: IdentifierNode | undefined;
+    let thisParamater: IdentifierNode | null = null;
     let identifier = this.readIdentifier("signature");
     if (!identifier) {
-      return undefined;
+      return null;
     }
 
     const dotToken = this.peak();
@@ -570,7 +575,7 @@ export default class Parser extends Lexer {
       thisParamater = identifier;
 
       identifier = this.readIdentifier("signature");
-      if (!identifier) return undefined;
+      if (!identifier) return null;
     }
 
     const parameters = this.readParameters(thisParamater);
@@ -584,20 +589,21 @@ export default class Parser extends Lexer {
 
   readSignatureCondition(
     isInverted: boolean
-  ): WithoutRange<SignatureCallNode> | undefined {
+  ): WithoutRange<SignatureCallNode> | null {
     const signature = this.readSignature();
     if (signature) {
       return {
         isInverted,
         signature,
+        symbol: null,
         type: NodeType.SignatureCondition
       };
     }
 
-    return undefined;
+    return null;
   }
 
-  readStringLiteral(): StringLiteralNode | undefined {
+  readStringLiteral(): StringLiteralNode | null {
     const token = this.read(TokenType.StringLiteral);
     return token
       ? {
@@ -608,10 +614,10 @@ export default class Parser extends Lexer {
           value: token.value.substr(1, token.value.length - 2),
           type: NodeType.StringLiteral
         }
-      : undefined;
+      : null;
   }
 
-  readStoryBoundary(): StoryToken | undefined {
+  readStoryBoundary(): StoryToken | null {
     let token = this.next();
     if (token && isStoryToken(token)) {
       return token;
@@ -630,12 +636,12 @@ export default class Parser extends Lexer {
       if (isStoryToken(token)) return token;
     }
 
-    return undefined;
+    return null;
   }
 
-  tryReadArgument(): ArgumentNode | undefined {
+  tryReadArgument(): ArgumentNode | null {
     const token = this.peak();
-    if (!token) return undefined;
+    if (!token) return null;
 
     return token.type === TokenType.Identifier
       ? this.readIdentifier()
@@ -644,7 +650,7 @@ export default class Parser extends Lexer {
 
   tryReadConstant() {
     const token = this.peak();
-    if (!token) return undefined;
+    if (!token) return null;
 
     if (token.type === TokenType.FloatLiteral) {
       return this.readFloatLiteral();
@@ -655,6 +661,8 @@ export default class Parser extends Lexer {
     } else if (token.type === TokenType.StringLiteral) {
       return this.readStringLiteral();
     }
+
+    return null;
   }
 
   tryReadNotToken(): boolean {
@@ -669,20 +677,20 @@ export default class Parser extends Lexer {
 
   tryReadTypeAnnoation = this.injectRange<TypeAnnotationNode>(() => {
     if (!this.read(TokenType.BracketOpen)) {
-      return undefined;
+      return null;
     }
 
     const identifier = this.read(TokenType.Identifier, true, "typeIdentifier");
 
     if (!identifier) {
       this.consumeIncluding(TokenType.BracketClose);
-      return { type: NodeType.TypeAnnotation };
+      return { annotatedType: null, type: NodeType.TypeAnnotation };
     }
 
     const annotatedType = identifier.value;
     if (!this.read(TokenType.BracketClose, true)) {
       this.consumeIncluding(TokenType.BracketClose);
-      return { type: NodeType.TypeAnnotation };
+      return { annotatedType: null, type: NodeType.TypeAnnotation };
     }
 
     return {
@@ -691,14 +699,14 @@ export default class Parser extends Lexer {
     };
   });
 
-  tryReadParameterFlow(): ParameterFlow | undefined {
+  tryReadParameterFlow(): ParameterFlow | null {
     const token = this.peak();
     if (token && token.type === TokenType.Annotation) {
       this.next();
       return token.value === "[out]" ? ParameterFlow.Out : ParameterFlow.In;
     }
 
-    return undefined;
+    return null;
   }
 
   withBailOutTypes<T>(

@@ -17,9 +17,9 @@ export enum ParameterType {
 }
 
 export interface Parameter {
-  flow?: ParameterFlow;
-  fromIndex?: number;
-  fromSymbol?: Symbol;
+  flow: ParameterFlow | null;
+  fromIndex: number | null;
+  fromSymbol: Symbol | null;
   name: string;
   type: ParameterType;
 }

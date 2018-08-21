@@ -83,7 +83,7 @@ export default class DefinitionHandler extends Handler<Parameters> {
       wiki.name = signature.name;
       wiki.plainType = type;
       wiki.parameters = plainSignatures[0].parameters;
-      wiki.seeAlso = symbols.sort(sortSymbols);
+      wiki.seeAlso = symbols.length < 20 ? symbols.sort(sortSymbols) : [];
     }
 
     return this.render({

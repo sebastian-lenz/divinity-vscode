@@ -31,7 +31,15 @@
     {{{ wiki.content }}}
   {{/if}}
   {{#if wiki.editLink}}
-    <p><a href="{{ wiki.editLink }}">Edit this page</a></p>
+    {{#if wiki.notFound}}
+      <p><a href="{{ wiki.editLink }}">Create this page</a></p>
+      <details>
+        <summary>Template for this definition</summary>
+        <pre>{{> wiki-template}}</pre>
+      </details>
+    {{else}}
+      <p><a href="{{ wiki.editLink }}">Edit this page</a></p>
+    {{/if}}
   {{/if}}
 {{/if}}
 

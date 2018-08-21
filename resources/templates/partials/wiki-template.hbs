@@ -1,0 +1,29 @@
+===== Full Definition(s) =====
+{{#each signatures}}
+* {{ ../wiki.plainType }} '''{{ name }}'''(
+  {{~#if parameters~}}
+    {{~#each parameters~}}
+      {{~#if type}}''{{~#if flow}}'''[{{ flow }}]'''{{/if~}}({{ type }})''{{/if~}}
+      '''{{~ name ~}}'''
+      {{~#if @last}}{{else}}, {{/if~}}
+    {{~/each~}}
+  {{~/if}})
+{{/each}}
+
+===== Description =====
+
+{{#if wiki.parameters}}
+===== Parameters =====
+{{#each wiki.parameters}}
+* '''{{~ name ~}}''': 
+{{/each~}}
+{{/if}}
+
+===== Notes =====
+
+===== See Also =====
+{{#each wiki.seeAlso}}
+* [[Osiris/API/{{ name }}|{{ name }}]]
+{{/each}}
+
+[[Category:Osiris {{ wiki.category }}|{{ wiki.name }}]]

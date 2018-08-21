@@ -51,6 +51,7 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   }
 
   async load(noAnalysis?: boolean): Promise<T> {
+    this.isInvalid = true;
     const buffer = await this.getSource();
 
     const rootNode = await this.parse(buffer, noAnalysis);
@@ -120,7 +121,10 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   invalidate() {
     if (this.isInvalid) return;
     this.isInvalid = true;
-    this.story.queue.add(this.validate);
+
+    setImmediate(() => {
+      this.story.queue.add(this.validate);
+    });
   }
 
   protected setAllDiagnostics(diagnostics: Array<Diagnostic>) {

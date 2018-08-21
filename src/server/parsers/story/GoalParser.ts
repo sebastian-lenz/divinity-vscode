@@ -98,7 +98,10 @@ export default class GoalParser extends ParserBase {
   }
 
   readStoryOption(goal: StoryGoalNode, token: Token, isHeader: boolean) {
+    const startOffset = token.startOffset;
+    const startPosition = token.startPosition;
     let valueToken: Token | null;
+
     const headerCheck = (target: boolean) =>
       target !== isHeader
         ? this.addDiagnostic(
@@ -152,12 +155,20 @@ export default class GoalParser extends ParserBase {
 
       case "ParentTargetEdge":
         headerCheck(false);
-        const parent = this.readStringLiteral();
-        if (parent) {
+        const name = this.readStringLiteral();
+        if (name) {
           if (!goal.parentTargetEdges) {
             goal.parentTargetEdges = [];
           }
-          goal.parentTargetEdges.push(parent);
+
+          goal.parentTargetEdges.push({
+            endOffset: name.endOffset,
+            endPosition: name.endPosition,
+            name,
+            startOffset,
+            startPosition,
+            type: NodeType.ParentTragetEdge
+          });
         }
         break;
 

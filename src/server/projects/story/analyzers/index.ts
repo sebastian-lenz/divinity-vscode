@@ -1,5 +1,6 @@
 import eachNodeRecursive from "../../../parsers/story/utils/eachNodeRecursive";
 import ParameterAnalyzer from "./Parameter";
+import ParentTargetEdgeAnalyzer from "./ParentTargetEdge";
 import Resource from "../resources/Resource";
 import Story from "..";
 import SymbolLocationsAnalyzer from "./SymbolLocations";
@@ -23,6 +24,7 @@ export default class Analyzers {
   constructor(story: Story) {
     this.story = story;
     this.workers = [
+      new ParentTargetEdgeAnalyzer(this),
       new SyntaxErrorAnalyzer(this),
       new SymbolTypesAnalyzer(this),
       new SymbolLocationsAnalyzer(this),

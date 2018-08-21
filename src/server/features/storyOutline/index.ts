@@ -146,7 +146,7 @@ export default class StoryOutlineFeature extends Feature {
       }
 
       const edge = rootNode.parentTargetEdges.find(
-        edge => edge.value === goalName
+        edge => edge.name.value === goalName
       );
 
       if (!edge) {
@@ -166,7 +166,7 @@ export default class StoryOutlineFeature extends Feature {
         edits: [
           {
             newText: `"${newName}"`,
-            range: unpackRange(edge)
+            range: unpackRange(edge.name)
           }
         ]
       });

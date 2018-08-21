@@ -16,6 +16,7 @@ export const enum NodeType {
   IntegerLiteral,
   OperatorCondition,
   Parameter,
+  ParentTragetEdge,
   RealLiteral,
   Rule,
   RuleBlock,
@@ -55,6 +56,7 @@ export type AnyNode =
   | NumericLiteralNode
   | OperatorNode
   | ParameterNode
+  | ParentTargetEdgeNode
   | RuleBlockNode
   | RuleNode
   | SignatureCallNode
@@ -144,6 +146,11 @@ export interface ParameterNode extends AbstractNode {
   valueType: TypeAnnotationNode | null;
 }
 
+export interface ParentTargetEdgeNode extends AbstractNode {
+  name: StringLiteralNode;
+  type: NodeType.ParentTragetEdge;
+}
+
 export interface RuleNode extends AbstractNode {
   body: ActionBlockNode | null;
   comment: string | null;
@@ -174,7 +181,7 @@ export interface SignatureNode extends AbstractNode {
 }
 
 export interface StoryGoalNode extends AbstractGoalNode {
-  parentTargetEdges: Array<StringLiteralNode>;
+  parentTargetEdges: Array<ParentTargetEdgeNode>;
   subGoalCombiner: string | null;
   type: NodeType.StoryGoal;
   version: number | null;

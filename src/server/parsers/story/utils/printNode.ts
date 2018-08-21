@@ -54,6 +54,7 @@ export default function printNode(node?: AnyNode | null): string {
     case NodeType.DivGoal:
     case NodeType.StoryGoal:
     case NodeType.Definition:
+    case NodeType.ParentTragetEdge:
       return "";
   }
 }

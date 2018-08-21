@@ -36,6 +36,10 @@ export default function* eachNode(parent?: AnyNode): Iterable<AnyNode> {
       if (parent.init) yield parent.init;
       if (parent.kb) yield parent.kb;
       if (parent.exit) yield parent.exit;
+
+      for (let index = 0; index < parent.parentTargetEdges.length; index++) {
+        yield parent.parentTargetEdges[index];
+      }
       break;
 
     case NodeType.SignatureAction:

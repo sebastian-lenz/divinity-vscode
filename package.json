@@ -104,6 +104,16 @@
           ".div"
         ],
         "configuration": "./syntaxes/divinity-story-div.language-configuration.json"
+      },
+      {
+        "id": "divinity-story-log",
+        "aliases": [
+          "Divinity story log",
+          "divinity-story-log"
+        ],
+        "extensions": [
+          "osirislog.log"
+        ]
       }
     ],
     "menus": {
@@ -145,6 +155,11 @@
         "language": "divinity-story-goal",
         "scopeName": "text.divinity.storygoal",
         "path": "./syntaxes/divinity-story-goal.tmLanguage.json"
+      },
+      {
+        "language": "divinity-story-log",
+        "scopeName": "text.divinity.storylog",
+        "path": "./syntaxes/divinity-story-log.tmLanguage.json"
       }
     ],
     "problemMatchers": [

@@ -1,4 +1,5 @@
 import eachNodeRecursive from "../../../parsers/story/utils/eachNodeRecursive";
+import GuidInStringAnalyzer from "./GuidInString";
 import ParameterAnalyzer from "./Parameter";
 import ParentTargetEdgeAnalyzer from "./ParentTargetEdge";
 import Resource from "../resources/Resource";
@@ -28,7 +29,8 @@ export default class Analyzers {
       new SyntaxErrorAnalyzer(this),
       new SymbolTypesAnalyzer(this),
       new SymbolLocationsAnalyzer(this),
-      new ParameterAnalyzer(this)
+      new ParameterAnalyzer(this),
+      new GuidInStringAnalyzer(this)
     ];
   }
 

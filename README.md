@@ -6,7 +6,7 @@ This extensions enables language features for the scripting language Osiris foun
 
 ### Installation
 
-- Open the extensions tab (usually the last button in the action bar. You can lso use the shortcut Ctrl+Shift+X)
+- Open the extensions tab (usually the last button in the action bar. You can also use the shortcut Ctrl+Shift+X)
 - Search for "divinity-vscode"
 - On the plugin page, click the "Install", then the "Enable" button
 
@@ -64,7 +64,7 @@ You can rename custom procedures, databases and queries as well as variables and
 
 ### API Explorer
 
-Built in browser for the complete API with contents fetched from the Divinity Wiki when available. Open the command palette (e.g. press Ctrl+Shift+P) and search for the command `Show API explorer` to open the API explorer. The "Show definition" command (in the context menu or F12) directly brings you to the documentation page of the selected symbol.
+Built in browser for the complete API with contents fetched from the Divinity Wiki when available. Open the command palette (e.g. press Ctrl+Shift+P) and search for the command `Show API explorer` to open the API explorer. The "Show definition" command (in the context menu or F12) of the text editor directly shows you to the documentation page of the currently selected system symbol.
 
 ![API explorer](resources/features/api-explorer.gif)
 
@@ -96,6 +96,13 @@ ParentTargetEdge "NameOfParentGoal"
 ```
 
 You can safely ignore the header section, it will be the same for all your goals. The three main sections are self explonary and are the equvalent of the three panels you see in the built in editor. Beneath the exit section you'll notice the command `ParentTargetEdge`, this command tells the game the name of the parent goal. You may use the story outline to move goals around or you can directly edit the structure here.
+
+## Known issues
+
+- The story outline currently doesn't mark goals with errors. This will change in a future update of VS Code, see  
+  https://github.com/Microsoft/vscode/issues/56477
+- The code examples in the API explorer use a different syntax highlighting, see  
+  https://github.com/Microsoft/vscode/issues/56356
 
 ## Feedback
 

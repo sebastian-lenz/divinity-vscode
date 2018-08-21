@@ -98,7 +98,7 @@ export default class StoryOutlineFeature extends Feature {
       edits: [
         {
           newText: `"${newParent}"`,
-          range: unpackRange(rootNode.parentTargetEdges[0])
+          range: unpackRange(rootNode.parentTargetEdges[0].name)
         }
       ]
     });

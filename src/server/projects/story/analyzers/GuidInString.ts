@@ -11,6 +11,12 @@ export default class GuidInStringAnalyzer extends SyncAnalyzer {
       return false;
     }
 
+    // Do not raise warnings if it's just a guid
+    // (used like that when setting atmospheres)
+    if (node.value.length === 36) {
+      return false;
+    }
+
     if (
       INVALID_PREFIX.test(node.value) ||
       node.value.charAt(node.value.length - 37) !== "_"

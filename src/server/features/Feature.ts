@@ -6,7 +6,7 @@ import {
 } from "vscode-languageserver";
 
 import eachRuleNode from "../parsers/story/utils/eachRuleNode";
-import isCallerNode from "../parsers/story/utils/isCallerNode";
+import isCallerNode, { CallerNode } from "../parsers/story/utils/isCallerNode";
 import Resource from "../projects/story/resources/Resource";
 import Server from "../Server";
 import Symbol from "../projects/story/Symbol";
@@ -63,6 +63,7 @@ export default class Feature {
     options: LocationOptions
   ): Promise<{
     nodes?: Array<AnyNode>;
+    node?: CallerNode;
     resource?: Resource;
     symbol?: Symbol;
   }> {
@@ -71,7 +72,7 @@ export default class Feature {
 
     for (const node of nodes) {
       if (isCallerNode(node) && node.symbol) {
-        return { nodes, resource, symbol: node.symbol };
+        return { nodes, node, resource, symbol: node.symbol };
       }
     }
 

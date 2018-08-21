@@ -34,8 +34,8 @@ export default class DefinitionFeature extends Feature {
   async handleDefinition(
     params: TextDocumentPositionParams
   ): Promise<Location | null> {
-    const { resource, symbol } = await this.getSymbolAt(params);
-    if (!symbol) {
+    const { node, resource, symbol } = await this.getSymbolAt(params);
+    if (!node || !resource || !symbol) {
       return null;
     }
 
@@ -48,9 +48,23 @@ export default class DefinitionFeature extends Feature {
     }
 
     if (systemSymbol) {
+      // VS Code also calls this when pressing Ctrl and hovering symbols in
+      // the document, reduce unwanted API explorer popups by only showing
+      // it if the signature name is focused
+      const document = resource.getDocument();
+      if (document) {
+        const offset = document.offsetAt(params.position);
+        if (
+          offset < node.signature.identifier.startOffset ||
+          offset > node.signature.identifier.endOffset
+        ) {
+          return null;
+        }
+      }
+
       this.server.connection.sendNotification(
         apiShowEvent,
-        `/definition/${symbol.name}`
+        `/definition/${systemSymbol.name}`
       );
 
       return {

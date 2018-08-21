@@ -191,8 +191,11 @@ export default class Lexer {
   endRegion(token: Token) {
     if (this.regionId === -1) return;
     const region = this.regions[this.regionId];
-    region.endOffset = token.endOffset;
-    region.endOffset = token.endOffset;
+
+    // Use the start position as we might use the story end boundary
+    // and this will mess up the hierarchy
+    region.endOffset = token.startOffset;
+    region.endPosition = token.startPosition;
 
     this.regionId = -1;
   }
@@ -250,6 +253,7 @@ export default class Lexer {
   }
 
   startRegion(token: Token, name: string) {
+    this.endRegion(token);
     this.regionId = this.regions.length;
     this.regions.push({
       endOffset: token.endOffset,

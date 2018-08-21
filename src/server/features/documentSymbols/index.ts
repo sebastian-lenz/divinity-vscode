@@ -3,7 +3,7 @@ import {
   SymbolKind,
   SymbolInformation,
   TextDocument
-} from "vscode-languageserver/lib/main";
+} from "vscode-languageserver";
 
 import Feature from "../Feature";
 import GoalResource from "../../projects/story/resources/GoalResource";
@@ -12,7 +12,7 @@ import printNode from "../../parsers/story/utils/printNode";
 import runSafeAsync from "../../utils/runSafeAsync";
 import Server from "../../Server";
 import toLocation from "../../utils/toLocation";
-import { AbstractGoalNode } from "../../parsers/story/models/nodes";
+import { AbstractGoalNode, Region } from "../../parsers/story/models/nodes";
 
 export default class DocumentSymbolsFeature extends Feature {
   constructor(server: Server) {
@@ -34,7 +34,7 @@ export default class DocumentSymbolsFeature extends Feature {
       result.push({
         containerName: "",
         name: "Init section",
-        kind: 3, // SymbolKind.Namespace,
+        kind: SymbolKind.Namespace,
         location: toLocation(document, story.init)
       });
     }
@@ -43,20 +43,33 @@ export default class DocumentSymbolsFeature extends Feature {
       result.push({
         containerName: "",
         name: "KB section",
-        kind: 3, // SymbolKind.Namespace,
+        kind: SymbolKind.Namespace,
         location: toLocation(document, story.kb)
       });
 
+      let region: Region | null = null;
       for (const rule of story.kb.rules) {
-        let kind: SymbolKind = 12; // SymbolKind.Function;
+        let kind: SymbolKind = SymbolKind.Function;
         if (rule.ruleType == "IF") {
-          kind = 24; // SymbolKind.Event;
+          kind = SymbolKind.Event;
         } else if (rule.ruleType === "QRY") {
-          kind = 11; // SymbolKind.Interface;
+          kind = SymbolKind.Interface;
+        }
+
+        if (rule.region !== region) {
+          region = rule.region;
+          if (region) {
+            result.push({
+              containerName: "KB section",
+              name: region.name,
+              kind: SymbolKind.Namespace,
+              location: toLocation(document, region)
+            });
+          }
         }
 
         result.push({
-          containerName: "KB section",
+          containerName: region ? region.name : "KB section",
           name: printNode(rule),
           kind,
           location: toLocation(document, rule)
@@ -67,7 +80,7 @@ export default class DocumentSymbolsFeature extends Feature {
         result.push({
           containerName: "",
           name: "Exit section",
-          kind: 3, // SymbolKind.Namespace,
+          kind: SymbolKind.Namespace,
           location: toLocation(document, story.exit)
         });
       }

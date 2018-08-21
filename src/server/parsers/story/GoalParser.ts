@@ -189,6 +189,11 @@ export default class GoalParser extends ParserBase {
       }
 
       const storyToken = this.readStoryBoundary();
+      if (node && storyToken) {
+        node.endOffset = storyToken.startOffset;
+        node.endPosition = storyToken.startPosition;
+      }
+
       if (storyToken && storyToken.type !== boundaryType) {
         this.addDiagnostic(
           storyToken,

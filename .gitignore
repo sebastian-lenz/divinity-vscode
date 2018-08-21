@@ -4,3 +4,5 @@ docs
 etc
 lib
 node_modules
+
+*.vsix

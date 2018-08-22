@@ -37,8 +37,8 @@ export default class HeaderGoalResource extends Resource<StoryGoalNode> {
 
   getUri(): string {
     const { goal, story } = this;
-    const { UUID } = story.project.meta;
-    return `divinity:///${UUID}/${goal.name}.divGoal`;
+    const { uuid } = story.project.meta;
+    return `divinity:///${uuid}/${goal.name}.divGoal`;
   }
 
   update(allNodes: Array<HeaderGoalNode>, rootNode: HeaderGoalNode) {

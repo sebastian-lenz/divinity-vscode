@@ -83,9 +83,10 @@ export default class Repository {
     const project = new Project(projects, {
       path,
       meta: {
-        Folder: "",
-        Name: "Divinity Engine",
-        UUID: "00000000-0000-0000-0000-000000000000"
+        folder: "",
+        dependencies: [],
+        name: "Divinity Engine",
+        uuid: "00000000-0000-0000-0000-000000000000"
       }
     });
 

@@ -33,14 +33,14 @@ export default class ActivityIndicatorFeature extends Feature {
   }
 
   private handleLevelIndexStart = (args: ProjectEventArgs) => {
-    const { UUID } = args.project.meta;
+    const { uuid } = args.project.meta;
 
     const createProgress = () =>
       new Promise(resolve => {
         const { events } = this;
 
         function onReady({ project }: ProjectEventArgs) {
-          if (UUID !== project.meta.UUID) return;
+          if (uuid !== project.meta.uuid) return;
           events.removeListener(levelIndexReadyEvent, onReady);
           resolve();
         }
@@ -59,7 +59,7 @@ export default class ActivityIndicatorFeature extends Feature {
   };
 
   private handleProjectAdded = (args: ProjectEventArgs) => {
-    const { Name, UUID } = args.project.meta;
+    const { name, uuid } = args.project.meta;
 
     // Reemitt for task provider
     this.client.emit(projectAddedEvent, args);
@@ -69,7 +69,7 @@ export default class ActivityIndicatorFeature extends Feature {
         const { events } = this;
 
         function onReady({ project }: ProjectEventArgs) {
-          if (UUID !== project.meta.UUID) return;
+          if (uuid !== project.meta.uuid) return;
           events.removeListener(projectReadyEvent, onReady);
           resolve();
         }
@@ -81,7 +81,7 @@ export default class ActivityIndicatorFeature extends Feature {
       {
         cancellable: false,
         location: ProgressLocation.Notification,
-        title: `Loading project ${Name}`
+        title: `Loading project ${name}`
       },
       createProgress
     );

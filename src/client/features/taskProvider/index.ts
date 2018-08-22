@@ -106,13 +106,17 @@ export default class TaskProviderFeature extends Feature
       for (const [caption, mode] of modes) {
         const definition: DivinityTaskDefinition = {
           gameDataPath: normalize(join(project.path, "..", "..")),
-          mod: ["Shared", project.meta.Folder],
+          mod: [
+            "Shared",
+            ...project.meta.dependencies.map(dependency => dependency.folder),
+            project.meta.folder
+          ],
           output: join(project.path, "Story", "story.div.osi"),
           reload: mode,
           type: compilerTaskType
         };
 
-        const task = new Task(definition, caption, project.meta.Name);
+        const task = new Task(definition, caption, project.meta.name);
         task.group = TaskGroup.Build;
         task.problemMatchers = [problemMatcher];
         task.presentationOptions = {

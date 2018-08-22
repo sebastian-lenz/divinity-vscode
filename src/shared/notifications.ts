@@ -20,23 +20,27 @@ export interface ProjectInfo {
   path: string;
 }
 
-export interface ProjectMetaInfo {
-  Author?: string;
-  CharacterCreationLevelName?: string;
-  Description?: string;
-  Folder: string;
-  GMTemplate?: string;
-  LobbyLevelName?: string;
-  MD5?: string;
-  MenuLevelName?: string;
-  Name: string;
-  NumPlayers?: string;
-  PhotoBooth?: string;
-  StartupLevelName?: string;
-  Tags?: string;
-  Type?: string;
-  UUID: string;
-  Version?: string;
+export interface ProjectMetaDependency {
+  folder: string;
+  md5?: string;
+  name: string;
+  uuid: string;
+  version?: string;
+}
+
+export interface ProjectMetaInfo extends ProjectMetaDependency {
+  author?: string;
+  characterCreationLevelName?: string;
+  dependencies: Array<ProjectMetaDependency>;
+  description?: string;
+  gmTemplate?: string;
+  lobbyLevelName?: string;
+  menuLevelName?: string;
+  numPlayers?: string;
+  photoBooth?: string;
+  startupLevelName?: string;
+  tags?: string;
+  type?: string;
 }
 
 export interface GoalInfo {

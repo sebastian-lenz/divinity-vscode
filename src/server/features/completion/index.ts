@@ -195,7 +195,7 @@ export default class CompletionFeature extends Feature {
       }
 
       result.push({
-        data: `${SYMBOL_DATA}${project.meta.UUID}`,
+        data: `${SYMBOL_DATA}${project.meta.uuid}`,
         kind,
         label: symbol.name
       });

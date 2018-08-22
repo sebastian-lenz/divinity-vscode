@@ -34,7 +34,7 @@ export default class Projects extends EventEmitter {
   }
 
   findProjectByUid(uid: string) {
-    return this.projects.find(project => project.meta.UUID === uid) || null;
+    return this.projects.find(project => project.meta.uuid === uid) || null;
   }
 
   async findResource(uri: string | ParsedUri | null): Promise<Resource | null> {

@@ -246,7 +246,7 @@ export default class StoryOutlineFeature extends Feature
     const params: MoveGoalParams = {
       goalName: goal.name,
       newParent: newParent.trim(),
-      projectUid: project.meta.UUID
+      projectUid: project.meta.uuid
     };
 
     const result = await connection.sendRequest<MoveGoalResult>(
@@ -290,7 +290,7 @@ export default class StoryOutlineFeature extends Feature
     const params: RenameGoalParams = {
       goalName: goal.name,
       newName,
-      projectUid: project.meta.UUID
+      projectUid: project.meta.uuid
     };
 
     const result = await connection.sendRequest<RenameGoalResult>(

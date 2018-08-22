@@ -40,6 +40,11 @@ type WithoutRange<T extends TokenRange> = Omit<
 
 const GUID_REGEXP = /(.*?)([0-9A-Fa-f]{8}-([0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12})$/;
 
+export interface ReadSignaturePrepend {
+  identifier: IdentifierNode;
+  typeAnnotation: TypeAnnotationNode | null;
+}
+
 export default class Parser extends Lexer {
   bailOutTypes: Array<TokenType> = [];
 
@@ -105,10 +110,11 @@ export default class Parser extends Lexer {
     }
   }
 
-  injectRange<T extends AbstractNode>(callback: {
-    (): WithoutRange<T> | null;
-  }): { (): T | null } {
-    return () => {
+  injectRange<
+    T extends AbstractNode,
+    R extends Function = { (): T | null }
+  >(callback: { (...args: Array<any>): WithoutRange<T> | null }): R {
+    return ((...args: Array<any>) => {
       const first = this.peak();
       if (!first) {
         return null;
@@ -116,7 +122,7 @@ export default class Parser extends Lexer {
 
       const startOffset = first.startOffset;
       const startPosition = first.startPosition;
-      const result = callback() as T;
+      const result = callback(...args) as T;
 
       if (result) {
         const last = this.last();
@@ -131,7 +137,7 @@ export default class Parser extends Lexer {
       }
 
       return result;
-    };
+    }) as any;
   }
 
   isBailOutToken(token: Token): boolean {
@@ -240,16 +246,17 @@ export default class Parser extends Lexer {
 
   readCondition = this.injectRange<ConditionNode>(() => {
     const isInverted = this.tryReadNotToken();
-    const maybeBracket = this.peak();
-    const maybeOperator = this.peak(1);
+    const typeAnnotation = this.tryReadTypeAnnoation();
+    const argument = this.tryReadArgument();
+    if (!argument) {
+      return null;
+    }
 
-    if (
-      (maybeBracket && maybeBracket.type === TokenType.BracketOpen) ||
-      (maybeOperator && maybeOperator.type === TokenType.Operator)
-    ) {
-      return this.readOperatorCondition(isInverted);
+    const maybeOperator = this.peak();
+    if (maybeOperator && maybeOperator.type === TokenType.Operator) {
+      return this.readOperatorCondition(isInverted, typeAnnotation, argument);
     } else {
-      return this.readSignatureCondition(isInverted);
+      return this.readSignatureCondition(isInverted, typeAnnotation, argument);
     }
   });
 
@@ -362,16 +369,14 @@ export default class Parser extends Lexer {
   }
 
   readOperatorCondition(
-    isInverted: boolean
+    isInverted: boolean,
+    leftType: TypeAnnotationNode | null,
+    leftOperant: ArgumentNode
   ): WithoutRange<OperatorNode> | null {
-    const leftType = this.tryReadTypeAnnoation();
-    const leftOperant = this.tryReadArgument();
-    if (!leftOperant) return null;
-
     const operatorToken = this.read(TokenType.Operator, true);
     if (!operatorToken) return null;
-    const operator = operatorToken.value;
 
+    const operator = operatorToken.value;
     const rightType = this.tryReadTypeAnnoation();
     const rightOperant = this.tryReadArgument();
     if (!rightOperant) return null;
@@ -416,20 +421,11 @@ export default class Parser extends Lexer {
     return null;
   });
 
-  readParameters(thisParameter: IdentifierNode | null): Array<ParameterNode> {
+  readParameters(thisParameter: ParameterNode | null): Array<ParameterNode> {
     const result: Array<ParameterNode> = [];
 
     if (thisParameter) {
-      result.push({
-        endOffset: thisParameter.endOffset,
-        endPosition: thisParameter.endPosition,
-        flow: null,
-        startOffset: thisParameter.startOffset,
-        startPosition: thisParameter.startPosition,
-        argument: thisParameter,
-        type: NodeType.Parameter,
-        valueType: null
-      });
+      result.push(thisParameter);
     }
 
     if (!this.consume(TokenType.BracketOpen)) {
@@ -562,20 +558,43 @@ export default class Parser extends Lexer {
     };
   });
 
-  readSignature = this.injectRange<SignatureNode>(() => {
-    let thisParamater: IdentifierNode | null = null;
-    let identifier = this.readIdentifier("signature");
-    if (!identifier) {
-      return null;
+  readSignature = this.injectRange<
+    SignatureNode,
+    { (prepended?: ReadSignaturePrepend): SignatureNode }
+  >((prepended?: ReadSignaturePrepend) => {
+    let identifier: IdentifierNode | null;
+    let typeAnnotation: TypeAnnotationNode | null;
+
+    if (!prepended) {
+      typeAnnotation = this.tryReadTypeAnnoation();
+      identifier = this.readIdentifier("signatureOrThis");
+    } else {
+      typeAnnotation = prepended.typeAnnotation;
+      identifier = prepended.identifier;
     }
 
+    if (!identifier) return null;
     const dotToken = this.peak();
-    if (dotToken && dotToken.type === TokenType.Dot) {
-      this.next();
-      thisParamater = identifier;
+    let thisParamater: ParameterNode | null = null;
 
+    if (dotToken && dotToken.type === TokenType.Dot) {
+      const startNode = typeAnnotation || identifier;
+      thisParamater = {
+        endOffset: identifier.endOffset,
+        endPosition: identifier.endPosition,
+        flow: null,
+        startOffset: startNode.startOffset,
+        startPosition: startNode.startPosition,
+        argument: identifier,
+        type: NodeType.Parameter,
+        valueType: typeAnnotation
+      };
+
+      this.next();
       identifier = this.readIdentifier("signature");
-      if (!identifier) return null;
+      if (!identifier) {
+        return null;
+      }
     }
 
     const parameters = this.readParameters(thisParamater);
@@ -588,9 +607,26 @@ export default class Parser extends Lexer {
   });
 
   readSignatureCondition(
-    isInverted: boolean
+    isInverted: boolean,
+    typeAnnotation: TypeAnnotationNode | null,
+    identifier: ArgumentNode
   ): WithoutRange<SignatureCallNode> | null {
-    const signature = this.readSignature();
+    if (identifier.type !== NodeType.Identifier) {
+      this.addDiagnostic(
+        identifier,
+        msgUnexpectedToken({
+          expectedToken: TokenType.Identifier
+        })
+      );
+
+      return null;
+    }
+
+    const signature = this.readSignature({
+      typeAnnotation,
+      identifier
+    });
+
     if (signature) {
       return {
         isInverted,

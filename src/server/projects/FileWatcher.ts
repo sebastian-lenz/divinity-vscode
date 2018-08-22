@@ -111,6 +111,7 @@ export default class FileWatcher extends EventEmitter {
 
   private handleFileEvent(type: string, file: string) {
     const { pending } = this;
+    if (!file) return;
     const path = normalize(join(this.path, file));
     if (!this.pattern.test(path)) {
       return;

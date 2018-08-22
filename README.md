@@ -72,6 +72,10 @@ Built in browser for the complete API with contents fetched from the Divinity Wi
 
 The code completion, hovers and the signature help will show you short snippet from the Wiki to assist you. You can add documentation to your own procedures and queries by placing a JSDoc comment above them.
 
+### Osiris log file highlighting
+
+The extensions includes a special syntax highlighting for Osiris log files.
+
 ## Differences to the built in editor
 
 Unlike the built in editor VS Code will not display three different regions when editing story goals. Instead you'll see the complete source file of each goal. The basic file structure looks like this:

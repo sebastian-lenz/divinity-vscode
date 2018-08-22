@@ -626,8 +626,12 @@ export default class Parser extends Lexer {
       typeAnnotation,
       identifier
     });
-
+    
     if (signature) {
+      const start = typeAnnotation||identifier;
+      signature.startOffset = start.startOffset;
+      signature.startPosition = start.startPosition;
+
       return {
         isInverted,
         signature,

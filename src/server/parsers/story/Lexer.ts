@@ -372,7 +372,11 @@ export default class Lexer {
           if (char === CHAR_DOT) {
             // If a dot is found, switch to float literal
             type = TokenType.FloatLiteral;
-          } else if (char === CHAR_MINUS) {
+          } else if (
+            char === CHAR_MINUS ||
+            (char >= 65 && char <= 70) ||
+            (char >= 97 && char <= 102)
+          ) {
             // A guid starting with only numbers
             type = TokenType.Identifier;
           } else if (!isNumericChar(char)) {

@@ -41,8 +41,8 @@ interface LSNode {
   $: {
     id: string;
   };
-  attribute: Array<LSNodeAttribute>;
-  children: Array<{ node: Array<LSNode> }>;
+  attribute?: Array<LSNodeAttribute>;
+  children?: Array<{ node: Array<LSNode> }>;
 }
 
 function findNodeById(nodes: Array<LSNode> | null, id: string) {
@@ -65,6 +65,10 @@ function isProjectMetaDependency(value: any): value is ProjectMetaDependency {
 }
 
 function readAttributes(node: LSNode, result: any = {}): any {
+  if (!node.attribute) {
+    return result;
+  }
+
   for (const { $ } of node.attribute) {
     const { id, value } = $;
     let key: string;
@@ -90,6 +94,10 @@ function readAttributes(node: LSNode, result: any = {}): any {
 }
 
 function readDependencies(node: LSNode): Array<ProjectMetaDependency> {
+  if (!node.children) {
+    return [];
+  }
+
   return node.children
     .map(child => {
       const shortDesc = child.node.find(
@@ -104,7 +112,7 @@ export default function readProjectMetaInfo(data: LSFile): ProjectMetaInfo {
   const result: Partial<ProjectMetaInfo> = { dependencies: [] };
   const config = findRegionById(data, "Config");
   const root = findNodeById(config, "root");
-  if (!root) {
+  if (!root || !root.children) {
     throw new Error("Invalid project metadata.");
   }
 

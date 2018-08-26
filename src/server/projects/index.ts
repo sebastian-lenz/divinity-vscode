@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { normalize, join, resolve } from "path";
 
+import DataIndex from "../parsers/pak/DataIndex";
 import Documentation from "../documentation/Documentation";
 import parseUri, { ParsedUri } from "../utils/parseUri";
 import Project from "./Project";
@@ -19,6 +20,7 @@ import { ProjectInfo } from "../../shared/notifications";
  * @event "showError" (string: message)
  */
 export default class Projects extends EventEmitter {
+  readonly dataIndex: DataIndex = new DataIndex();
   readonly docProvider: Documentation = new Documentation();
   readonly projects: Array<Project> = [];
 
@@ -104,6 +106,8 @@ export default class Projects extends EventEmitter {
       if (info) {
         let project = this.findProjectByPath(info.path);
         if (!project) {
+          await this.dataIndex.load(normalize(join(info.path, "..", "..")));
+
           project = new Project(this, info);
           this.projects.push(project);
           this.emit("projectAdded", project);

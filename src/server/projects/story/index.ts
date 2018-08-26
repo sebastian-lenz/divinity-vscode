@@ -7,7 +7,6 @@ import FileWatcher from "../FileWatcher";
 import Goal from "./Goal";
 import GoalResource from "./resources/GoalResource";
 import HeaderResource from "./resources/HeaderResource";
-import HeaderGoalResource from "./resources/HeaderGoalResource";
 import Project from "../Project";
 import Resource from "./resources/Resource";
 import sortGoals from "./utils/sortGoals";
@@ -29,9 +28,7 @@ export default class Story {
     "GUIDSTRING"
   ];
 
-  private headerResource: HeaderResource | null = null;
   private goals: Array<Goal> = [];
-  private ignoreHeaderChange: NodeJS.Timer | null = null;
   private resources: Array<Resource> = [];
   private watchers: Array<FileWatcher> = [];
 
@@ -57,19 +54,13 @@ export default class Story {
     this.updateTree();
   }
 
-  addIgnoredGoal(name: string) {
-    if (this.headerResource) {
-      this.headerResource.addIgnoredGoal(name);
-    }
-  }
-
-  addResource(resource: HeaderGoalResource) {
-    this.resources.push(resource);
-  }
-
   async analyzeGoals() {
     for (const resource of this.resources) {
-      if (resource instanceof GoalResource && !resource.isDeleted) {
+      if (
+        resource instanceof GoalResource &&
+        !resource.isDeleted &&
+        !resource.isHeaderGoal()
+      ) {
         await resource.analyze();
       }
     }
@@ -93,7 +84,11 @@ export default class Story {
 
     const rawPath = this.getGoalsPath();
     if (existsSync(rawPath) && path.startsWith(rawPath)) {
-      resource = new GoalResource({ story: this, path });
+      resource = new GoalResource({
+        file: { path, type: "local" },
+        story: this
+      });
+
       this.resources.push(resource);
       return resource;
     }
@@ -109,10 +104,10 @@ export default class Story {
     );
   }
 
-  getHeaderGoalResources(): Array<HeaderGoalResource> {
+  getHeaderGoalResources(): Array<GoalResource> {
     return this.resources.filter(
-      file => file instanceof HeaderGoalResource
-    ) as Array<HeaderGoalResource>;
+      resource => resource instanceof GoalResource && resource.isHeaderGoal()
+    ) as Array<GoalResource>;
   }
 
   getGoal(name: string): Goal | null {
@@ -139,17 +134,8 @@ export default class Story {
     return this.getRootGoals().sort(sortGoals);
   }
 
-  ignoreHeaderFileEvents() {
-    if (this.ignoreHeaderChange) {
-      clearTimeout(this.ignoreHeaderChange);
-    }
-
-    this.ignoreHeaderChange = setTimeout(() => {
-      this.ignoreHeaderChange = null;
-    }, 500);
-  }
-
-  initialize() {
+  async initialize() {
+    await this.loadDependencies();
     this.watchers = this.createWatchers();
   }
 
@@ -196,29 +182,6 @@ export default class Story {
     }
   }
 
-  private createHeaderWatcher(): FileWatcher {
-    const watcher = new FileWatcher({
-      path: normalize(join(this.project.path, "Story")),
-      pattern: /story\.div$/
-    });
-
-    let resource: HeaderResource | null = null;
-    watcher.on("update", path => {
-      if (!resource) {
-        resource = new HeaderResource({ story: this, path });
-        this.headerResource = resource;
-        this.resources.push(resource);
-      }
-
-      if (!this.ignoreHeaderChange) {
-        resource.loadSync();
-      }
-    });
-
-    watcher.scanAndStartSync();
-    return watcher;
-  }
-
   private createGoalWatcher(): FileWatcher {
     const watcher = new FileWatcher({
       path: this.getGoalsPath(),
@@ -228,7 +191,11 @@ export default class Story {
     watcher.on("update", path => {
       let resource = this.findResource(path);
       if (!resource) {
-        resource = new GoalResource({ story: this, path });
+        resource = new GoalResource({
+          file: { path, type: "local" },
+          story: this
+        });
+
         this.resources.push(resource);
       }
 
@@ -253,12 +220,6 @@ export default class Story {
 
   private createWatchers(): Array<FileWatcher> {
     const watchers: Array<FileWatcher> = [];
-
-    try {
-      watchers.push(this.createHeaderWatcher());
-    } catch (error) {
-      this.project.projects.emit("showError", error.message);
-    }
 
     try {
       watchers.push(this.createGoalWatcher());
@@ -289,4 +250,51 @@ export default class Story {
       project.levels.initialize();
     }
   };
+
+  private async loadDependencies() {
+    const { dataIndex } = this.project.projects;
+    const dependencies = ["Shared"];
+    const resources: Array<Resource> = [];
+
+    for (const { folder } of this.project.meta.dependencies) {
+      if (dependencies.indexOf(folder) === -1) {
+        dependencies.push(folder);
+      }
+    }
+
+    const { storyHeader } = dataIndex;
+    if (!storyHeader) {
+      throw new Error(`Could not locate story headers.`);
+    }
+
+    resources.push(
+      new HeaderResource({
+        file: storyHeader,
+        story: this
+      })
+    );
+
+    for (const dependency of dependencies) {
+      const mod = await dataIndex.getMod(dependency);
+      if (!mod) {
+        throw new Error(`Could not load project dependency "${dependency}"`);
+      }
+
+      for (const goalName of Object.keys(mod.goals)) {
+        resources.push(
+          new GoalResource({
+            file: mod.goals[goalName],
+            headerGoal: true,
+            name: goalName,
+            story: this
+          })
+        );
+      }
+    }
+
+    this.resources.push(...resources);
+    for (const resource of resources) {
+      await resource.load();
+    }
+  }
 }

@@ -119,12 +119,16 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   }
 
   invalidate() {
-    if (this.isInvalid) return;
+    if (this.isHeaderGoal() || this.isInvalid) return;
     this.isInvalid = true;
 
     setImmediate(() => {
       this.story.queue.add(this.validate);
     });
+  }
+
+  isHeaderGoal(): boolean {
+    return false;
   }
 
   protected setAllDiagnostics(diagnostics: Array<Diagnostic>) {

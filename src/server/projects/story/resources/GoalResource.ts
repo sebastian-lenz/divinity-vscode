@@ -8,19 +8,28 @@ import FileResource, { FileResourceOptions } from "./FileResource";
 import Goal from "../Goal";
 import Story from "..";
 
+export interface GoalResourceOptions extends FileResourceOptions {
+  name?: string;
+  headerGoal?: boolean;
+}
+
 export default class GoalResource extends FileResource<StoryGoalNode> {
   readonly goal: Goal;
+  readonly headerGoal: boolean;
   readonly story: Story;
 
-  constructor(options: FileResourceOptions) {
+  constructor(options: GoalResourceOptions) {
     super(options);
 
-    const { path, story } = options;
-    const goal = new Goal(story, basename(path, ".txt"), this);
-    story.addIgnoredGoal(goal.name);
+    const { file, story } = options;
+    let { name } = options;
+    if (!name) name = basename(file.path, ".txt");
+
+    const goal = new Goal(story, name, this);
     story.addGoal(goal);
 
     this.goal = goal;
+    this.headerGoal = !!options.headerGoal;
     this.story = story;
   }
 
@@ -47,6 +56,20 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
     return super.getSource();
   }
 
+  getUri(): string {
+    if (this.file.type === "pak") {
+      const { goal, story } = this;
+      const { uuid } = story.project.meta;
+      return `divinity:///${uuid}/${goal.name}.divGoal`;
+    }
+
+    return `file:///${encodeURIComponent(this.path.replace(/\\/g, "/"))}`;
+  }
+
+  isHeaderGoal(): boolean {
+    return this.headerGoal;
+  }
+
   protected async parse(
     source: string,
     noAnalysis?: boolean
@@ -69,7 +92,7 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
 
     story.symbols.update();
 
-    if (!story.isInitializing) {
+    if (!story.isInitializing && !this.headerGoal) {
       // Set the parser errors silently so analyzers can see them
       this.diagnostics = diagnostics;
       this.setAllDiagnostics([

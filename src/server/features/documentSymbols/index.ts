@@ -7,7 +7,6 @@ import {
 
 import Feature from "../Feature";
 import GoalResource from "../../projects/story/resources/GoalResource";
-import HeaderGoalResource from "../../projects/story/resources/HeaderGoalResource";
 import printNode from "../../parsers/story/utils/printNode";
 import runSafeAsync from "../../utils/runSafeAsync";
 import Server from "../../Server";
@@ -98,10 +97,7 @@ export default class DocumentSymbolsFeature extends Feature {
   async getSymbols(uri: string) {
     const { projects } = this.server;
     const goal = await projects.findResource(uri);
-    if (
-      !(goal instanceof GoalResource) &&
-      !(goal instanceof HeaderGoalResource)
-    ) {
+    if (!(goal instanceof GoalResource)) {
       return null;
     }
 

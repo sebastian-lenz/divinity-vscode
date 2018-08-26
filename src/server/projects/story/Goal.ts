@@ -1,4 +1,3 @@
-import HeaderGoalResource from "./resources/HeaderGoalResource";
 import Resource from "./resources/Resource";
 import sortGoals from "./utils/sortGoals";
 import Story from ".";
@@ -25,7 +24,7 @@ export default class Goal {
   }
 
   isHeaderGoal(): boolean {
-    return this.resource instanceof HeaderGoalResource;
+    return this.resource.isHeaderGoal();
   }
 
   setParents(parents: Array<string>) {

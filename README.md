@@ -12,10 +12,7 @@ This extensions enables language features for the scripting language Osiris foun
 
 ### Open project
 
-- Before editing a project for the first time in VS Code, make sure you have a fresh built of the project.
-  - Start the Glasses editor and switch to your project.
-  - Open the story editor and choose "File" > "Build".
-- In VS Code, select "File" > "Open Folder..." and select the data folder of your project. The path usually looks something like this: `../Divinity Original Sin 2/Data/Mods/MyModeName_########-####-####-####-############`
+- Select "File" > "Open Folder..." and select the data folder of your project. The path usually looks something like this: `../Divinity Original Sin 2/Data/Mods/MyModeName_########-####-####-####-############`
 - After a moment the story outline panel should show up beneath your files and you are ready to go.
 
 ## Features
@@ -142,6 +139,10 @@ are part of the installed extension:
   Copyright (c) 2015 Norbyte  
   MIT License  
   https://github.com/Norbyte/lslib
+- **node-lz4**  
+  Copyright (c) 2012 Pierre Curto  
+  MIT License  
+  https://github.com/pierrec/node-lz4
 - **promise-queue**  
   Copyright (c) 2013 Mikhail Davydov and other contributors  
   MIT License  

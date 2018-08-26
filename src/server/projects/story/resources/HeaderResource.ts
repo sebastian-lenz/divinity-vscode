@@ -1,54 +1,19 @@
-import { join } from "path";
-import { readFileSync, writeFileSync } from "fs";
-
-import FileResource, { FileResourceOptions } from "./FileResource";
-import HeaderGoalResource from "./HeaderGoalResource";
+import FileResource from "./FileResource";
 import HeaderParser from "../../../parsers/story/HeaderParser";
 
 import {
   HeaderNode,
-  HeaderGoalNode,
   DefinitionNode
 } from "../../../parsers/story/models/nodes";
 
 export default class HeaderResource extends FileResource<HeaderNode> {
-  ignoredGoals: Array<string>;
-  ignoredPath: string;
-
-  constructor(options: FileResourceOptions) {
-    super(options);
-
-    const ignoredPath = join(
-      options.story.project.path,
-      "Story",
-      "story_custom_goals.txt"
-    );
-
-    let ignoredGoals: Array<string>;
-    try {
-      const data = readFileSync(ignoredPath, "utf-8");
-      ignoredGoals = JSON.parse(data);
-    } catch (error) {
-      ignoredGoals = [];
-    }
-
-    this.ignoredGoals = ignoredGoals;
-    this.ignoredPath = ignoredPath;
-  }
-
-  addIgnoredGoal(name: string) {
-    const { ignoredGoals, ignoredPath } = this;
-    if (ignoredGoals.indexOf(name) !== -1) return;
-    ignoredGoals.push(name);
-
-    try {
-      writeFileSync(ignoredPath, JSON.stringify(ignoredGoals));
-    } catch (error) {}
-  }
-
   loadSync(noAnalysis?: boolean) {
     const source = this.getSourceSync();
     this.parse(source, noAnalysis);
+  }
+
+  isHeaderGoal(): boolean {
+    return true;
   }
 
   protected async parse(
@@ -59,7 +24,6 @@ export default class HeaderResource extends FileResource<HeaderNode> {
     const { header } = parser.parse();
 
     this.syncDefinitions(header.definitions);
-    this.syncGoals(header.goals);
     this.syncTypeAliases(header.typeAliases);
 
     this.story.symbols.update();
@@ -72,38 +36,6 @@ export default class HeaderResource extends FileResource<HeaderNode> {
     for (const definition of definitions) {
       symbols.addSystemSymbol(definition);
     }
-  }
-
-  private syncGoals(nodes: Array<HeaderGoalNode>) {
-    const { story } = this;
-    const existingResources = story.getHeaderGoalResources();
-    const resources: Array<HeaderGoalResource> = [];
-
-    for (const node of nodes) {
-      if (!node.title || this.ignoredGoals.indexOf(node.title) !== -1) continue;
-      const name = node.title;
-      let resource = existingResources.find(
-        resource => resource.goal.name === name
-      );
-
-      if (!resource) {
-        if (story.getGoal(name) !== null) {
-          continue;
-        }
-
-        resource = new HeaderGoalResource({ name, story });
-        story.addResource(resource);
-      }
-
-      if (resource) {
-        resource.update(nodes, node);
-        resources.push(resource);
-      }
-    }
-
-    existingResources
-      .filter(resource => resources.indexOf(resource) === -1)
-      .forEach(resource => story.removeResource(resource));
   }
 
   private syncTypeAliases(aliases: Array<string>) {

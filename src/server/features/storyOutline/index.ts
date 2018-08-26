@@ -3,7 +3,6 @@ import { TextDocumentEdit } from "vscode-languageserver";
 import debounce from "../../utils/debounce";
 import Feature from "../Feature";
 import Goal from "../../projects/story/Goal";
-import HeaderGoalResource from "../../projects/story/resources/HeaderGoalResource";
 import Project from "../../projects/Project";
 import runSafeAsync from "../../utils/runSafeAsync";
 import Server from "../../Server";
@@ -130,7 +129,7 @@ export default class StoryOutlineFeature extends Feature {
     const children = goal.getChildren();
 
     for (const child of children) {
-      if (child.resource instanceof HeaderGoalResource) {
+      if (child.resource.isHeaderGoal()) {
         return {
           error: `A goal which contains subgoals from the shared mod cannot be renamed.`
         };
@@ -183,7 +182,7 @@ export default class StoryOutlineFeature extends Feature {
       .filter(goal => !goal.resource.isDeleted && stack.indexOf(goal) === -1)
       .map(goal => ({
         children: this.createTree(goal.getSortedChildren(), [...stack, goal]),
-        isShared: !goal.resource || goal.resource instanceof HeaderGoalResource,
+        isShared: !goal.resource || goal.resource.isHeaderGoal(),
         name: goal.name,
         uri: goal.resource.getUri()
       }));

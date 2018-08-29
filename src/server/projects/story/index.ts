@@ -30,7 +30,7 @@ export default class Story {
 
   private goals: Array<Goal> = [];
   private resources: Array<Resource> = [];
-  private watchers: Array<FileWatcher> = [];
+  private watchers: Array<FileWatcher> | null = null;
 
   constructor(project: Project) {
     this.project = project;
@@ -67,8 +67,10 @@ export default class Story {
   }
 
   dispose() {
-    this.watchers.forEach(watcher => watcher.dispose());
-    this.watchers.length = 0;
+    if (this.watchers) {
+      this.watchers.forEach(watcher => watcher.dispose());
+      this.watchers = null;
+    }
   }
 
   findGoal(name: string): Goal | null {
@@ -235,7 +237,7 @@ export default class Story {
   }
 
   private handleQueueEmpty = async () => {
-    if (this.isInitializing) {
+    if (this.isInitializing && this.watchers) {
       const { project, symbols } = this;
 
       this.isInitializing = false;

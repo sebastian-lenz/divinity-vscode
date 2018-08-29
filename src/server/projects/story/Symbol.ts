@@ -294,6 +294,7 @@ export default class Symbol {
   toSystemSymbol(definition: DefinitionNode) {
     const { parameters } = toParameters(this, definition.signature);
 
+    this.type = getDefinitionSymbolType(definition);
     this.isSystem = true;
     this.parameters = parameters;
   }
@@ -366,7 +367,6 @@ export default class Symbol {
       signature.parameters.length
     );
 
-    symbol.type = getDefinitionSymbolType(definition);
     symbol.toSystemSymbol(definition);
     return symbol;
   }

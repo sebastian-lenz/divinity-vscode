@@ -106,13 +106,12 @@ export default class Projects extends EventEmitter {
       if (info) {
         let project = this.findProjectByPath(info.path);
         if (!project) {
-          await this.dataIndex.load(normalize(join(info.path, "..", "..")));
-
           project = new Project(this, info);
           this.projects.push(project);
           this.emit("projectAdded", project);
 
-          project.initialize();
+          await this.dataIndex.load(normalize(join(info.path, "..", "..")));
+          await project.initialize();
         }
 
         return project;

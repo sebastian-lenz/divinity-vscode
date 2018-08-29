@@ -30,7 +30,7 @@ export default class Project implements ProjectInfo {
     };
   }
 
-  initialize() {
-    this.story.initialize();
+  async initialize() {
+    return this.story.initialize();
   }
 }

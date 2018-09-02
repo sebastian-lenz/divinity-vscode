@@ -12,12 +12,7 @@ interface LSFile {
         version: string;
       };
     }>;
-    region: Array<{
-      $: {
-        id: string;
-      };
-      node: Array<LSNode>;
-    }>;
+    region: Array<LSRegion> | LSRegion;
     version: Array<{
       $: {
         build: string;
@@ -27,6 +22,13 @@ interface LSFile {
       };
     }>;
   };
+}
+
+interface LSRegion {
+  $: {
+    id: string;
+  };
+  node: Array<LSNode> | LSNode;
 }
 
 interface LSNodeAttribute {
@@ -42,16 +44,28 @@ interface LSNode {
     id: string;
   };
   attribute?: Array<LSNodeAttribute>;
-  children?: Array<{ node: Array<LSNode> }>;
+  children?: {
+    node: Array<LSNode> | LSNode;
+  };
 }
 
-function findNodeById(nodes: Array<LSNode> | null, id: string) {
+function findNodeById(nodes: Array<LSNode> | LSNode | null, id: string) {
   if (!nodes) return null;
-  return nodes.find(node => node.$.id === id) || null;
+  if (Array.isArray(nodes)) {
+    return nodes.find(node => node.$.id === id) || null;
+  } else {
+    return nodes.$.id === id ? nodes : null;
+  }
 }
 
 function findRegionById(file: LSFile, id: string) {
-  const region = file.save.region.find(region => region.$.id === id);
+  let region: LSRegion | undefined = undefined;
+  if (Array.isArray(file.save.region)) {
+    region = file.save.region.find(region => region.$.id === id);
+  } else {
+    region = file.save.region.$.id === id ? file.save.region : undefined;
+  }
+
   return region ? region.node : null;
 }
 
@@ -93,17 +107,21 @@ function readAttributes(node: LSNode, result: any = {}): any {
   return result;
 }
 
-function readDependencies(node: LSNode): Array<ProjectMetaDependency> {
-  if (!node.children) {
-    return [];
-  }
+function readChildNodes(node: LSNode): Array<LSNode> {
+  if (!node.children) return [];
+  return Array.isArray(node.children.node)
+    ? node.children.node
+    : [node.children.node];
+}
 
-  return node.children
-    .map(child => {
-      const shortDesc = child.node.find(
-        node => node.$.id === "ModuleShortDesc"
-      );
-      return shortDesc ? readAttributes(shortDesc) : null;
+function readDependencies(node: LSNode): Array<ProjectMetaDependency> {
+  return readChildNodes(node)
+    .map(node => {
+      try {
+        return node.$.id === "ModuleShortDesc" ? readAttributes(node) : null;
+      } catch (error) {
+        return null;
+      }
     })
     .filter((child: any) => isProjectMetaDependency(child));
 }
@@ -116,7 +134,7 @@ export default function readProjectMetaInfo(data: LSFile): ProjectMetaInfo {
     throw new Error("Invalid project metadata.");
   }
 
-  for (const node of root.children[0].node) {
+  for (const node of readChildNodes(root)) {
     if (node.$.id === "ModuleInfo") {
       readAttributes(node, result);
     } else if (node.$.id === "Dependencies") {

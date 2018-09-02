@@ -22,17 +22,13 @@ import { ProjectInfo } from "../../shared/notifications";
 export default class Projects extends EventEmitter {
   readonly dataIndex: DataIndex = new DataIndex();
   readonly docProvider: Documentation = new Documentation();
+  readonly pendingProjects: { [path: string]: Promise<Project> } = {};
   readonly projects: Array<Project> = [];
 
   dispose() {
     const { projects } = this;
     projects.forEach(project => project.dispose());
     projects.length = 0;
-  }
-
-  findProjectByPath(path: string): Project | null {
-    path = normalize(path);
-    return this.projects.find(project => project.path === path) || null;
   }
 
   findProjectByUid(uid: string) {
@@ -61,7 +57,31 @@ export default class Projects extends EventEmitter {
     return goal ? goal.resource : null;
   }
 
-  async findResourceByPath(path: string | null): Promise<Resource | null> {
+  async tryCreateForFolder(initialPath: string): Promise<Project | null> {
+    let path = resolve(initialPath);
+    let nextPath = path;
+
+    do {
+      path = nextPath;
+      nextPath = resolve(path, "..");
+
+      const info = this.tryGetProjectInfo(path);
+      if (info) {
+        return this.loadProject(info);
+      }
+    } while (path !== nextPath);
+
+    return null;
+  }
+
+  private findProjectByPath(path: string): Project | null {
+    path = normalize(path);
+    return this.projects.find(project => project.path === path) || null;
+  }
+
+  private async findResourceByPath(
+    path: string | null
+  ): Promise<Resource | null> {
     if (!path) {
       return null;
     }
@@ -81,42 +101,44 @@ export default class Projects extends EventEmitter {
     return null;
   }
 
-  async tryGetProjectInfo(path: string): Promise<ProjectInfo | null> {
+  private async loadProject(info: ProjectInfo): Promise<Project> {
+    const { dataIndex, pendingProjects, projects } = this;
+    const { path } = info;
+    let project = this.findProjectByPath(path);
+    if (project) {
+      return project;
+    }
+
+    if (!(path in pendingProjects)) {
+      pendingProjects[path] = new Promise<Project>(async resolve => {
+        project = new Project(this, info);
+        this.emit("projectAdded", project);
+
+        await dataIndex.load(normalize(join(path, "..", "..")));
+        await project.initialize();
+
+        projects.push(project);
+        delete pendingProjects[path];
+        resolve(project);
+      });
+    }
+
+    return pendingProjects[info.path];
+  }
+
+  private tryGetProjectInfo(path: string): ProjectInfo | null {
     path = normalize(path);
     try {
-      const data = await readXmlFile(join(path, "meta.lsx"));
+      const data = readXmlFile(join(path, "meta.lsx"));
+      if (!data) {
+        return null;
+      }
+
       return {
         meta: readProjectMetaInfo(data),
         path
       };
     } catch (e) {}
-
-    return null;
-  }
-
-  async tryCreateForFolder(initialPath: string): Promise<Project | null> {
-    let path = resolve(initialPath);
-    let nextPath = path;
-
-    do {
-      path = nextPath;
-      nextPath = resolve(path, "..");
-
-      const info = await this.tryGetProjectInfo(path);
-      if (info) {
-        let project = this.findProjectByPath(info.path);
-        if (!project) {
-          project = new Project(this, info);
-          this.projects.push(project);
-          this.emit("projectAdded", project);
-
-          await this.dataIndex.load(normalize(join(info.path, "..", "..")));
-          await project.initialize();
-        }
-
-        return project;
-      }
-    } while (path !== nextPath);
 
     return null;
   }

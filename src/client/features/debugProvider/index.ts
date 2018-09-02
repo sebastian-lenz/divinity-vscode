@@ -82,9 +82,14 @@ export default class DebugProviderFeature extends Feature
    */
 
   handleGetDebugExecutable = () => {
-    return {
-      command: this.client.getExecutable("DebuggerFrontend.exe")
-    };
+    const command = this.client.getExecutable("DebuggerFrontend.exe");
+    if (!command) {
+      window.showErrorMessage(
+        'The path to the debugger must be set using "divinity.compilerPath".'
+      );
+    }
+
+    return { command };
   };
 
   provideDebugConfigurations(
@@ -104,7 +109,7 @@ export default class DebugProviderFeature extends Feature
     folder: WorkspaceFolder | undefined,
     debugConfiguration: DvinityDebugConfiguration,
     token?: CancellationToken
-  ): Promise<DebugConfiguration> {
+  ): Promise<DebugConfiguration | null> {
     if (!("backendHost" in debugConfiguration)) {
       debugConfiguration.backendHost = "127.0.0.1";
     }
@@ -114,13 +119,12 @@ export default class DebugProviderFeature extends Feature
     }
 
     if (!("debugInfoPath" in debugConfiguration)) {
-      if (folder) {
-        debugConfiguration.debugInfoPath = join(
-          folder.uri.fsPath,
-          "Story",
-          "story.debugInfo"
-        );
+      const debugInfoPath = await this.getDebugInfoPath();
+      if (!debugInfoPath) {
+        return null;
       }
+
+      debugConfiguration.debugInfoPath = debugInfoPath;
     }
 
     return debugConfiguration;

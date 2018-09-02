@@ -127,6 +127,10 @@ are part of the installed extension:
   Copyright (c) 2013 Ramesh Nair  
   MIT License  
   https://github.com/hiddentao/fast-levenshtein
+- **fast-xml-parser**  
+  Copyright (c) 2017 Amit Kumar Gupta  
+  MIT License (modified)  
+  https://github.com/NaturalIntelligence/fast-xml-parser
 - **Handlebars.js**  
   Copyright (C) 2011-2017 by Yehuda Katz  
   MIT License  
@@ -147,10 +151,6 @@ are part of the installed extension:
   Copyright (c) 2013 Mikhail Davydov and other contributors  
   MIT License  
   https://github.com/promise-queue/promise-queue
-- **sax**  
-  Copyright (c) Isaac Z. Schlueter and Contributors  
-  ISC License  
-  https://github.com/isaacs/sax-js/blob/master/LICENSE
 - **semver**  
   Copyright (c) Isaac Z. Schlueter and Contributors  
   ISC License  
@@ -159,11 +159,3 @@ are part of the installed extension:
   Copyright (c) Microsoft Corporation  
   MIT License  
   https://github.com/Microsoft/vscode
-- **node-xml2js**  
-  Copyright 2010, 2011, 2012, 2013. All rights reserved.  
-  MIT License  
-  https://github.com/Leonidas-from-XIV/node-xml2js
-- **xmlbuilder-js**  
-  Copyright (c) 2013 Ozgur Ozcitak  
-  MIT License  
-  https://github.com/oozcitak/xmlbuilder-js

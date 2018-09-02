@@ -50,6 +50,7 @@ export const enum ReloadMode {
 export interface DivinityTaskDefinition extends TaskDefinition {
   checkNames?: boolean;
   checkOnly?: boolean;
+  debugInfo?: string;
   gameDataPath: string;
   mod: Array<string>;
   noWarn?: Array<string>;
@@ -72,24 +73,12 @@ export default class TaskProviderFeature extends Feature
     workspace.registerTaskProvider(compilerTaskType, this);
   }
 
-  getPath(fileName: string) {
-    // const path = join(getPackagePath(), "bin", fileName);
-    const compilerPath = workspace
-      .getConfiguration("divinity")
-      .get<string>("compilerPath");
-
-    if (!compilerPath) return undefined;
-    const path = join(compilerPath, fileName);
-
-    return existsSync(path) ? path : undefined;
-  }
-
   getCompilerPath(): string | undefined {
-    return this.getPath("StoryCompiler.exe");
+    return this.client.getExecutable("StoryCompiler.exe");
   }
 
   getRconPath(): string | undefined {
-    return this.getPath("RconClient.exe");
+    return this.client.getExecutable("RconClient.exe");
   }
 
   handleProjectAdded = ({ project }: ProjectEventArgs) => {
@@ -105,6 +94,7 @@ export default class TaskProviderFeature extends Feature
     for (const project of projects) {
       for (const [caption, mode] of modes) {
         const definition: DivinityTaskDefinition = {
+          debugInfo: join(project.path, "Story", "story.debugInfo"),
           gameDataPath: normalize(join(project.path, "..", "..")),
           mod: [
             "Shared",
@@ -205,6 +195,7 @@ export default class TaskProviderFeature extends Feature
     const {
       checkNames,
       checkOnly,
+      debugInfo,
       gameDataPath,
       mod,
       noWarn,
@@ -217,6 +208,10 @@ export default class TaskProviderFeature extends Feature
       "--output",
       quotedString(output)
     ];
+
+    if (debugInfo) {
+      args.push("--debug-info", quotedString(debugInfo));
+    }
 
     for (const modName of mod) {
       args.push("--mod", quotedString(modName));

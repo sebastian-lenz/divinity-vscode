@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
-import * as path from "path";
+import { join } from "path";
 
-import { ExtensionContext, OutputChannel, window } from "vscode";
+import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import {
   LanguageClient,
   LanguageClientOptions,
@@ -11,6 +11,7 @@ import {
 
 import features, { Feature } from "./features";
 import { readyEvent } from "../shared/notifications";
+import { existsSync } from "fs";
 
 export default class Client extends EventEmitter {
   clientId = "osiris-language-server";
@@ -34,9 +35,7 @@ export default class Client extends EventEmitter {
 
   private createConnection() {
     const { context, languages, outputChannel } = this;
-    const module = context.asAbsolutePath(
-      path.join("lib", "server", "index.js")
-    );
+    const module = context.asAbsolutePath(join("lib", "server", "index.js"));
 
     let serverOptions: ServerOptions = {
       run: {
@@ -112,5 +111,17 @@ export default class Client extends EventEmitter {
         this.connectCallbacks.push(resolve);
       });
     }
+  }
+
+  getExecutable(fileName: string) {
+    // const path = join(getPackagePath(), "bin", fileName);
+    const compilerPath = workspace
+      .getConfiguration("divinity")
+      .get<string>("compilerPath");
+
+    if (!compilerPath) return undefined;
+    const path = join(compilerPath, fileName);
+
+    return existsSync(path) ? path : undefined;
   }
 }

@@ -54,6 +54,11 @@
         "category": "Divinity"
       },
       {
+        "command": "divinity.getDebugExecutable",
+        "title": "Get debug executable",
+        "category": "Divinity"
+      },
+      {
         "command": "divinity.storyOutline.openGoal",
         "title": "Open Goal",
         "category": "Divinity"
@@ -225,6 +230,10 @@
             "type": "boolean",
             "description": "Verify game object names (slow!)"
           },
+          "debugInfo": {
+            "type": "string",
+            "description": "Debugging symbols path"
+          },
           "reload": {
             "type": "string",
             "description": "Turns on editor level reloading.",
@@ -237,6 +246,39 @@
       },
       {
         "type": "divinity.task.reload"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "osiris",
+        "label": "Osiris Debugger",
+        "languages": [
+          "divinity-story-goal"
+        ],
+        "adapterExecutableCommand": "divinity.getDebugExecutable",
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "debugInfoPath": {
+                "type": "string",
+                "description": "Location of story debug symbol file"
+              },
+              "backendHost": {
+                "type": "string",
+                "description": "IP address of debugger backend server"
+              },
+              "backendPort": {
+                "type": "number",
+                "description": "Port of debugger backend server"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "divinity-story-goal"
       }
     ],
     "views": {

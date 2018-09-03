@@ -204,7 +204,7 @@ export default class TaskProviderFeature extends Feature
 
     const args = [
       "--game-data-path",
-      quotedString(gameDataPath),
+      quotedString(gameDataPath.replace(/[\/\\]$/, "")),
       "--output",
       quotedString(output)
     ];

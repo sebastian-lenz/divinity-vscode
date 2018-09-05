@@ -270,6 +270,24 @@
               "backendPort": {
                 "type": "number",
                 "description": "Port of debugger backend server"
+              },
+              "dbgOptions": {
+                "type": "object",
+                "description": "Debugger custom overrides",
+                "properties": {
+                  "rawFrames": {
+                    "type": "boolean",
+                    "description": "Requests the debugger to return raw call frames from the backend instead of merging and pretty printing the frames."
+                  },
+                  "stopOnAllFrames": {
+                    "type": "boolean",
+                    "description": "Stop on all frames during single-stepping instead of meaningful frames."
+                  },
+                  "stopOnDbPropagation": {
+                    "type": "boolean",
+                    "description": "Stop inside database propagation calls during single-stepping."
+                  }
+                }
               }
             }
           }

@@ -20,6 +20,11 @@ export interface DvinityDebugConfiguration extends DebugConfiguration {
   backendHost?: string;
   backendPort?: number;
   debugInfoPath?: string;
+  dbgOptions?: {
+    rawFrames: boolean;
+    stopOnAllFrames: boolean;
+    stopOnDbPropagation: boolean;
+  };
   type: "osiris";
 }
 

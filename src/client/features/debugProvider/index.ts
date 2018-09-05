@@ -12,7 +12,6 @@ import {
 
 import Client from "../../Client";
 import Feature from "../Feature";
-import TaskProviderFeature from "../taskProvider";
 import { join } from "path";
 import { ProjectInfo } from "../../../shared/notifications";
 
@@ -39,34 +38,27 @@ export default class DebugProviderFeature extends Feature
 
     commands.registerCommand(
       "divinity.getDebugExecutable",
-      this.handleGetDebugExecutable
+      this.handleGetDebugExecutable,
+      this
     );
 
     debug.registerDebugConfigurationProvider("osiris", this);
   }
 
   async getDebugInfoPath(): Promise<string | null> {
-    const taskProvider = this.client.features.find(
-      feature => feature instanceof TaskProviderFeature
-    ) as TaskProviderFeature | undefined;
-
-    if (!taskProvider || taskProvider.projects.length === 0) {
-      return null;
-    }
-
+    const projects = this.client.getProjects();
     let project: ProjectInfo | undefined;
-    if (taskProvider.projects.length > 1) {
-      const items: Array<QuickPickProject> = taskProvider.projects.map(
-        project => ({
-          label: project.meta.name,
-          project
-        })
-      );
+
+    if (projects.length > 1) {
+      const items: Array<QuickPickProject> = projects.map(project => ({
+        label: project.meta.name,
+        project
+      }));
 
       const pick = await window.showQuickPick(items);
       project = pick ? pick.project : undefined;
     } else {
-      project = taskProvider.projects[0];
+      project = projects[0];
     }
 
     return project ? join(project.path, "Story", "story.debugInfo") : null;
@@ -86,16 +78,15 @@ export default class DebugProviderFeature extends Feature
   ): ProviderResult<DebugAdapterExecutable> {}
    */
 
-  handleGetDebugExecutable = () => {
-    const command = this.client.getExecutable("DebuggerFrontend.exe");
+  handleGetDebugExecutable() {
+    const command = this.client.getLSLibPath("DebuggerFrontend.exe");
     if (!command) {
-      window.showErrorMessage(
-        'The path to the debugger must be set using "divinity.compilerPath".'
-      );
+      this.client.lslib.offerInstall();
+      throw new Error("Debugger is missing.");
     }
 
     return { command };
-  };
+  }
 
   provideDebugConfigurations(
     folder: WorkspaceFolder | undefined,

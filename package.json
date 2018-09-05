@@ -54,6 +54,21 @@
         "category": "Divinity"
       },
       {
+        "command": "divinity.installLSLib",
+        "title": "Install LSLib Compiler and Debugger",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.installDebugger",
+        "title": "Install Debugger",
+        "category": "Divinity"
+      },
+      {
+        "command": "divinity.updateLSLib",
+        "title": "Update LSLib Compiler and Debugger",
+        "category": "Divinity"
+      },
+      {
         "command": "divinity.getDebugExecutable",
         "title": "Get debug executable",
         "category": "Divinity"
@@ -326,20 +341,24 @@
     "@types/js-yaml": "^3.11.2",
     "@types/long": "^4.0.0",
     "@types/marked": "^0.4.0",
+    "@types/mkdirp": "^0.5.2",
     "@types/node": "^8.10.26",
     "@types/promise-queue": "^2.2.0",
     "@types/rimraf": "^2.0.2",
     "js-yaml": "^3.12.0",
     "mocha": "^5.2.0",
-    "rimraf": "^2.6.2",
     "typescript": "2.8.3"
   },
   "dependencies": {
+    "@types/unzipper": "^0.9.0",
     "fast-levenshtein": "^2.0.6",
     "fast-xml-parser": "^3.12.0",
     "handlebars": "^4.0.11",
     "long": "^4.0.0",
+    "mkdirp": "^0.5.1",
     "promise-queue": "^2.2.5",
+    "rimraf": "^2.6.2",
+    "unzipper": "^0.9.3",
     "vscode": "^1.1.21",
     "vscode-languageclient": "^5.0.0",
     "vscode-languageserver": "^5.0.0"

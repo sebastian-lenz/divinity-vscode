@@ -1,6 +1,6 @@
 import { join, normalize } from "path";
-import { existsSync } from "fs";
 import {
+  Disposable,
   ProgressLocation,
   ShellExecution,
   ShellQuotedString,
@@ -24,6 +24,7 @@ import {
   ProjectInfo,
   ProjectEventArgs
 } from "../../../shared/notifications";
+import debounce from "../../../server/utils/debounce";
 
 function quotedString(value: string): ShellQuotedString {
   return { quoting: ShellQuoting.Strong, value };
@@ -70,21 +71,13 @@ export default class TaskProviderFeature extends Feature
     client.addListener(projectAddedEvent, this.handleProjectAdded);
     tasks.onDidStartTask(this.handleDidStartTask);
     tasks.onDidEndTaskProcess(this.handleDidEndTaskProcess);
+    workspace.onDidChangeConfiguration(this.handleDidChangeConfiguration);
     workspace.registerTaskProvider(compilerTaskType, this);
   }
 
-  getCompilerPath(): string | undefined {
-    return this.client.getExecutable("StoryCompiler.exe");
-  }
-
-  getRconPath(): string | undefined {
-    return this.client.getExecutable("RconClient.exe");
-  }
-
-  handleProjectAdded = ({ project }: ProjectEventArgs) => {
+  async createTasks() {
     const { projects } = this;
     const tasks: Array<Task> = [];
-    projects.push(project);
 
     if (!this.getCompilerPath()) {
       this.tasks = tasks;
@@ -113,15 +106,36 @@ export default class TaskProviderFeature extends Feature
           reveal: TaskRevealKind.Never
         };
 
-        const resolved = this.resolveTask(task);
-        if (resolved) tasks.push(resolved);
+        const resolved = await this.resolveTask(task);
+        if (resolved) {
+          tasks.push(resolved);
+        }
       }
     }
 
     this.tasks = tasks;
+  }
+
+  getCompilerPath(): string | undefined {
+    return this.client.getLSLibPath("StoryCompiler.exe");
+  }
+
+  getRconPath(): string | undefined {
+    return this.client.getLSLibPath("RconClient.exe");
+  }
+
+  handleProjectAdded = async ({ project }: ProjectEventArgs) => {
+    const { projects } = this;
+    projects.push(project);
+
+    return this.createTasks();
   };
 
-  handleDidEndTaskProcess = (event: TaskProcessEndEvent) => {
+  handleDidChangeConfiguration = debounce(() => {
+    this.createTasks();
+  }, 500);
+
+  handleDidEndTaskProcess = async (event: TaskProcessEndEvent) => {
     const { definition, scope } = event.execution.task;
     if (definition.type !== compilerTaskType) return;
 
@@ -132,7 +146,7 @@ export default class TaskProviderFeature extends Feature
     }
 
     const { reload } = definition as DivinityTaskDefinition;
-    const rconPath = this.getRconPath();
+    const rconPath = await this.getRconPath();
     if (rconPath && reload && scope && event.exitCode === 0) {
       const task = new Task(
         {
@@ -185,9 +199,9 @@ export default class TaskProviderFeature extends Feature
     return this.tasks;
   }
 
-  resolveTask(task: Task): Task | undefined {
+  async resolveTask(task: Task): Promise<Task | undefined> {
     const { definition } = task;
-    const compilerPath = this.getCompilerPath();
+    const compilerPath = await this.getCompilerPath();
     if (!compilerPath || definition.type !== compilerTaskType) {
       return undefined;
     }

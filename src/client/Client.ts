@@ -10,8 +10,9 @@ import {
 } from "vscode-languageclient";
 
 import features, { Feature } from "./features";
-import { readyEvent } from "../shared/notifications";
-import { existsSync } from "fs";
+import LSLib from "./utils/LSLib";
+import { readyEvent, ProjectInfo } from "../shared/notifications";
+import TaskProviderFeature from "./features/taskProvider";
 
 export default class Client extends EventEmitter {
   clientId = "osiris-language-server";
@@ -22,6 +23,7 @@ export default class Client extends EventEmitter {
   features: Array<Feature> = [];
   isReady: boolean = false;
   languages: Array<string> = ["divinity-story-goal"];
+  lslib: LSLib = new LSLib(this);
   outputChannel: OutputChannel;
 
   constructor(context: ExtensionContext) {
@@ -74,6 +76,7 @@ export default class Client extends EventEmitter {
       client.onNotification(readyEvent, () => {
         if (this.isReady) return;
         this.isReady = true;
+        this.lslib.update();
 
         for (const feature of this.features) {
           feature.initialize(client);
@@ -113,15 +116,19 @@ export default class Client extends EventEmitter {
     }
   }
 
-  getExecutable(fileName: string) {
-    // const path = join(getPackagePath(), "bin", fileName);
-    const compilerPath = workspace
-      .getConfiguration("divinity")
-      .get<string>("compilerPath");
+  getProjects(): Array<ProjectInfo> {
+    const taskProvider = this.features.find(
+      feature => feature instanceof TaskProviderFeature
+    ) as TaskProviderFeature | undefined;
 
-    if (!compilerPath) return undefined;
-    const path = join(compilerPath, fileName);
+    if (!taskProvider || taskProvider.projects.length === 0) {
+      return [];
+    }
 
-    return existsSync(path) ? path : undefined;
+    return taskProvider.projects;
+  }
+
+  getLSLibPath(fileName: string): string | undefined {
+    return this.lslib.resolve(fileName);
   }
 }

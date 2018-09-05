@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 
 const close = promisify(fs.close);
+const copyFile = promisify(fs.copyFile);
 const exists = promisify(fs.exists);
 const open = promisify(fs.open);
 const read = promisify(fs.read);
@@ -14,6 +15,7 @@ const writeFile = promisify(fs.writeFile);
 
 export {
   close,
+  copyFile,
   exists,
   open,
   read,

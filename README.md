@@ -100,62 +100,14 @@ You can safely ignore the header section, it will be the same for all your goals
 
 ## Known issues
 
-- The story outline currently doesn't mark goals with errors. This will change in a future update of VS Code, see  
-  https://github.com/Microsoft/vscode/issues/56477
 - The code examples in the API explorer use a different syntax highlighting, see  
   https://github.com/Microsoft/vscode/issues/56356
 
 ## Feedback
 
 All feedback is welcome. Please head over to the GitHub page of this project and start a new issue if you find any problems:  
-https://github.com/sebastian-lenz/divinity-vscode
+https://github.com/sebastian-lenz/divinity-vscode/issues
 
 ## License
 
 This extension is released under the MIT License.
-
-### Packaged software
-
-This extension uses several external dependencies, the following modules
-are part of the installed extension:
-
-- **djsdoc**  
-  Copyright (c) 2016-present Zeit, Inc.  
-  GPL v3.0 License  
-  https://github.com/EYHN/djsdoc
-- **fast-levenshtein**  
-  Copyright (c) 2013 Ramesh Nair  
-  MIT License  
-  https://github.com/hiddentao/fast-levenshtein
-- **fast-xml-parser**  
-  Copyright (c) 2017 Amit Kumar Gupta  
-  MIT License (modified)  
-  https://github.com/NaturalIntelligence/fast-xml-parser
-- **Handlebars.js**  
-  Copyright (C) 2011-2017 by Yehuda Katz  
-  MIT License  
-  https://github.com/wycats/handlebars.js
-- **long.js**  
-  Copyright (C) Daniel Wirtz  
-  Apache License Version 2.0  
-  https://github.com/dcodeIO/long.js
-- **lslib**  
-  Copyright (c) 2015 Norbyte  
-  MIT License  
-  https://github.com/Norbyte/lslib
-- **node-lz4**  
-  Copyright (c) 2012 Pierre Curto  
-  MIT License  
-  https://github.com/pierrec/node-lz4
-- **promise-queue**  
-  Copyright (c) 2013 Mikhail Davydov and other contributors  
-  MIT License  
-  https://github.com/promise-queue/promise-queue
-- **semver**  
-  Copyright (c) Isaac Z. Schlueter and Contributors  
-  ISC License  
-  https://github.com/npm/node-semver
-- **vscode**  
-  Copyright (c) Microsoft Corporation  
-  MIT License  
-  https://github.com/Microsoft/vscode

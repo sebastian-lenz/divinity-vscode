@@ -130,19 +130,25 @@ export default class LSLib {
     const picks: Array<DebuggerInstallPick> = [];
 
     if (projects.length) {
-      picks.push({
-        action: "editor",
-        description: this.resolveEditorPath(projects[0]),
-        label: "Install editor debugger",
-        project: projects[0]
-      });
+      const editorPath = this.resolveEditorPath(projects[0]);
+      if (editorPath) {
+        picks.push({
+          action: "editor",
+          description: editorPath,
+          label: "Install editor debugger",
+          project: projects[0]
+        });
+      }
 
-      picks.push({
-        action: "game",
-        description: this.resolveGamePath(projects[0]),
-        label: "Install game debugger",
-        project: projects[0]
-      });
+      const gamePath = this.resolveGamePath(projects[0]);
+      if (gamePath) {
+        picks.push({
+          action: "game",
+          description: gamePath,
+          label: "Install game debugger",
+          project: projects[0]
+        });
+      }
     }
 
     picks.push({

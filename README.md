@@ -2,6 +2,8 @@
 
 This extensions enables language features for the scripting language Osiris found in The Divinity Engine 2 based games.
 
+**New: You can now use LSLib Compiler and Debugger with this extension. This allows you to compile story scripts directly from VS Code and use the debugger of VS Code with story scripts. More info available here: https://gist.github.com/Norbyte/8b7eb35cd17f799ea113636b15e1f967**
+
 ## Getting started
 
 ### Installation
@@ -72,6 +74,22 @@ The code completion, hovers and the signature help will show you short snippet f
 ### Osiris log file highlighting
 
 The extensions includes a special syntax highlighting for Osiris log files.
+
+## Compiler and debugger
+
+This extension offers additional features when used together with LSLib Compiler and Debugger. You can install LSLib using the built-in installer. Open the command palette using Ctrl+Shift+P and search for the command `Install LSLib Compiler and Debugger`. The command will ask you for an install location, you must pick an empty folder. Tools installed this way will be automatically kept up-to-date on every launch of VS Code. You can manually check for updates using the command `Update LSLib Compiler and Debugger`.
+
+### Compile
+
+You can compile your story by pressing Ctrl+Shift+B and select one of the compile tasks.
+
+![API explorer](resources/features/compiler.gif)
+
+### Debug
+
+You can setup the debugger like any other debugger in VS Code by creating a launch configuartion, press F5 to create the default launch configuartion. After that you can start the debugger from the debugger panel or by pressing F5 again. The debugger needs modifications to your game or editor directory, follow this guide for a detailed description: https://gist.github.com/Norbyte/8b7eb35cd17f799ea113636b15e1f967
+
+![API explorer](resources/features/debugger.gif)
 
 ## Differences to the built in editor
 

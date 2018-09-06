@@ -60,7 +60,7 @@
       },
       {
         "command": "divinity.installDebugger",
-        "title": "Install Debugger",
+        "title": "Install LSLib Debugger for editor or game",
         "category": "Divinity"
       },
       {

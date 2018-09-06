@@ -1,4 +1,3 @@
-import * as mkdirp from "mkdirp";
 import * as rimraf from "rimraf";
 import { existsSync, writeFileSync } from "fs";
 import { Extract } from "unzipper";
@@ -20,7 +19,13 @@ import { ProjectInfo } from "../../shared/notifications";
 
 const etagFileName = "lslib.etag";
 const downloadUrl =
-  "https://s3.eu-central-1.amazonaws.com/nb-stor/dos/ExportTool/ExportTool-v1.11-with-compilers.zip";
+  "https://s3.eu-central-1.amazonaws.com/nb-stor/dos/Dbg/Dbg-Latest.zip";
+
+export enum LSLibFile {
+  Compiler,
+  Debugger,
+  Rcon
+}
 
 export interface ETagData {
   etag: string;
@@ -56,14 +61,29 @@ export default class LSLib {
     );
   }
 
-  async copyFile(path: string, name: string) {
-    const target = join(path, name);
-    const source = this.resolve(name);
-    if (!source) {
-      throw new Error("Missing source file.");
+  async clearInstallPath(path: string): Promise<boolean> {
+    const etag = await this.tryReadETag(path);
+    if (etag) {
+      rimraf.sync(`${path}${sep}**`);
+      return true;
     }
 
-    return copyFile(source, target);
+    return false;
+  }
+
+  async copyFiles(path: string, dirName: string) {
+    const rootPath = this.getPath();
+    if (!rootPath) {
+      throw new Error("LSLib not installed.");
+    }
+
+    const sourcePath = join(rootPath, dirName);
+    const sourceFiles = await readDir(sourcePath);
+    for (const sourceFile of sourceFiles) {
+      const source = join(sourcePath, sourceFile);
+      const target = join(path, sourceFile);
+      await copyFile(source, target);
+    }
   }
 
   async download(path: string): Promise<void> {
@@ -203,13 +223,10 @@ export default class LSLib {
     try {
       if (existsSync(join(path, "EoCApp.exe"))) {
         // Install to game directory
-        this.copyFile(path, "DXGI.dll");
-        this.copyFile(path, "libprotobuf-lite.dll");
+        await this.copyFiles(path, "GameBackend");
       } else if (existsSync(join(path, "DivinityEngine2.exe"))) {
         // Install to editor
-        this.copyFile(path, "OsirisDebugLauncher.exe");
-        this.copyFile(path, "DXGI.dll");
-        this.copyFile(path, "libprotobuf-lite.dll");
+        await this.copyFiles(path, "EditorBackend");
       } else {
         window.showErrorMessage(
           "Invalid path given, select the editor or game directory."
@@ -260,10 +277,7 @@ export default class LSLib {
   }
 
   async isValidInstallLocation(path: string): Promise<boolean> {
-    const etag = await this.tryReadETag(path);
-    if (etag) {
-      rimraf.sync(`${path}${sep}*`);
-      mkdirp.sync(path);
+    if (await this.clearInstallPath(path)) {
       return true;
     }
 
@@ -283,11 +297,24 @@ export default class LSLib {
     }
   }
 
-  resolve(name: string): string | undefined {
+  resolve(type: LSLibFile): string | undefined {
     const localPath = this.getPath();
-
     if (!localPath) return undefined;
-    const path = join(localPath, name);
+
+    let path: string;
+    switch (type) {
+      case LSLibFile.Compiler:
+        path = join(localPath, "Compiler", "StoryCompiler.exe");
+        break;
+      case LSLibFile.Debugger:
+        path = join(localPath, "Compiler", "DebuggerFrontend.exe");
+        break;
+      case LSLibFile.Rcon:
+        path = join(localPath, "Compiler", "RconClient.exe");
+        break;
+      default:
+        return undefined;
+    }
 
     return existsSync(path) ? path : undefined;
   }
@@ -338,7 +365,11 @@ export default class LSLib {
         async response => {
           const { etag } = response.headers;
           if (etag && typeof etag === "string" && etag !== localETag.etag) {
-            rimraf.sync(`${path}${sep}*`);
+            if (!(await this.clearInstallPath(localPath))) {
+              window.showErrorMessage("Could not clean up install folder.");
+              return resolve();
+            }
+
             await this.download(localPath);
 
             window.showInformationMessage(

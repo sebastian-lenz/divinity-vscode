@@ -14,6 +14,7 @@ import Client from "../../Client";
 import Feature from "../Feature";
 import { join } from "path";
 import { ProjectInfo } from "../../../shared/notifications";
+import { LSLibFile } from "../../utils/LSLib";
 
 export interface DvinityDebugConfiguration extends DebugConfiguration {
   backendHost?: string;
@@ -79,7 +80,7 @@ export default class DebugProviderFeature extends Feature
    */
 
   handleGetDebugExecutable() {
-    const command = this.client.getLSLibPath("DebuggerFrontend.exe");
+    const command = this.client.lslib.resolve(LSLibFile.Debugger);
     if (!command) {
       this.client.lslib.offerInstall();
       throw new Error("Debugger is missing.");

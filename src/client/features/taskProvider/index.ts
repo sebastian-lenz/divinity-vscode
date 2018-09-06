@@ -18,13 +18,14 @@ import {
 } from "vscode";
 
 import Client from "../../Client";
+import debounce from "../../../server/utils/debounce";
 import Feature from "../Feature";
+import { LSLibFile } from "../../utils/LSLib";
 import {
   projectAddedEvent,
   ProjectInfo,
   ProjectEventArgs
 } from "../../../shared/notifications";
-import debounce from "../../../server/utils/debounce";
 
 function quotedString(value: string): ShellQuotedString {
   return { quoting: ShellQuoting.Strong, value };
@@ -103,7 +104,7 @@ export default class TaskProviderFeature extends Feature
         task.group = TaskGroup.Build;
         task.problemMatchers = [problemMatcher];
         task.presentationOptions = {
-          reveal: TaskRevealKind.Never
+          reveal: TaskRevealKind.Silent
         };
 
         const resolved = await this.resolveTask(task);
@@ -117,11 +118,11 @@ export default class TaskProviderFeature extends Feature
   }
 
   getCompilerPath(): string | undefined {
-    return this.client.getLSLibPath("StoryCompiler.exe");
+    return this.client.lslib.resolve(LSLibFile.Compiler);
   }
 
   getRconPath(): string | undefined {
-    return this.client.getLSLibPath("RconClient.exe");
+    return this.client.lslib.resolve(LSLibFile.Rcon);
   }
 
   handleProjectAdded = async ({ project }: ProjectEventArgs) => {

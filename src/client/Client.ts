@@ -10,7 +10,7 @@ import {
 } from "vscode-languageclient";
 
 import features, { Feature } from "./features";
-import LSLib from "./utils/LSLib";
+import LSLib, { LSLibFile } from "./utils/LSLib";
 import { readyEvent, ProjectInfo } from "../shared/notifications";
 import TaskProviderFeature from "./features/taskProvider";
 
@@ -126,9 +126,5 @@ export default class Client extends EventEmitter {
     }
 
     return taskProvider.projects;
-  }
-
-  getLSLibPath(fileName: string): string | undefined {
-    return this.lslib.resolve(fileName);
   }
 }

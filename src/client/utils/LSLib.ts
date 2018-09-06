@@ -64,7 +64,7 @@ export default class LSLib {
   async clearInstallPath(path: string): Promise<boolean> {
     const etag = await this.tryReadETag(path);
     if (etag) {
-      rimraf.sync(`${path}${sep}**`);
+      rimraf.sync(`${path}${sep}*`);
       return true;
     }
 

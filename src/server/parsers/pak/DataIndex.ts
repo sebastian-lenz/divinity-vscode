@@ -73,16 +73,18 @@ export default class DataIndex extends Parser {
   }
 
   async getMod(name: string): Promise<ModData | null> {
-    try {
-      const { path } = this;
-      if (!path) throw new Error("Path not set.");
+    if (name !== "Shared") {
+      try {
+        const { path } = this;
+        if (!path) throw new Error("Path not set.");
 
-      const localPath = join(path, "Mods", name);
-      const stats = await stat(localPath);
-      if (stats.isDirectory()) {
-        return this.loadLocalMod(name, localPath);
-      }
-    } catch (e) {}
+        const localPath = join(path, "Mods", name);
+        const stats = await stat(localPath);
+        if (stats.isDirectory()) {
+          return this.loadLocalMod(name, localPath);
+        }
+      } catch (e) {}
+    }
 
     return name in this.packedMods ? this.packedMods[name] : null;
   }

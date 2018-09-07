@@ -188,7 +188,7 @@
         "owner": "divinity-vscode",
         "fileLocation": "absolute",
         "pattern": {
-          "regexp": "^(WARN|ERR!) ((?:[^:]+:\\\\)?[^:]*):(\\d+):(\\d+): \\[(\\d+)\\] (.*)$",
+          "regexp": "^(WARN|ERR!) ((?:[^:]+:\\\\)?[^:]*):(\\d+):(\\d+): \\[([^\\]]+)\\] (.*)$",
           "severity": 1,
           "file": 2,
           "line": 3,

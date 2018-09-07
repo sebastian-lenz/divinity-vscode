@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join, sep } from "path";
 
 import Category from "./Category";
 import Definition from "./Definition";
@@ -28,7 +28,7 @@ export default class Repository {
   async compile() {
     const rimraf = require("rimraf");
     const cachePath = join(this.path, "cache");
-    rimraf.sync(cachePath);
+    rimraf.sync(`${cachePath}${sep}*`);
     mkdirSync(cachePath);
 
     const docs = new Documentation();
@@ -80,15 +80,10 @@ export default class Repository {
 
   async update(path: string) {
     const projects = new Projects();
-    const project = new Project(projects, {
-      path,
-      meta: {
-        folder: "",
-        dependencies: [],
-        name: "Divinity Engine",
-        uuid: "00000000-0000-0000-0000-000000000000"
-      }
-    });
+    const project = await projects.tryCreateForFolder(path);
+    if (!project) {
+      throw new Error("Could not load project: " + path);
+    }
 
     console.log("Loading project...");
     project.initialize();

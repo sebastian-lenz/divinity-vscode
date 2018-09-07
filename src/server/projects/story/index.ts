@@ -7,6 +7,7 @@ import FileWatcher from "../FileWatcher";
 import Goal from "./Goal";
 import GoalResource from "./resources/GoalResource";
 import HeaderResource from "./resources/HeaderResource";
+import OrphanQueries from "./OrphanQueries";
 import Project from "../Project";
 import Resource from "./resources/Resource";
 import sortGoals from "./utils/sortGoals";
@@ -17,6 +18,7 @@ export default class Story {
   isInitializing: boolean = true;
 
   readonly analyzers: Analyzers = new Analyzers(this);
+  readonly orphanQueries: OrphanQueries = new OrphanQueries(this);
   readonly project: Project;
   readonly symbols: Symbols = new Symbols(this);
   readonly queue: Queue;
@@ -55,6 +57,10 @@ export default class Story {
   }
 
   async analyzeGoals() {
+    if (this.isInitializing) {
+      return;
+    }
+
     for (const resource of this.resources) {
       if (
         resource instanceof GoalResource &&
@@ -126,6 +132,10 @@ export default class Story {
 
   getGoalsPath(): string {
     return normalize(join(this.project.path, "Story", "RawFiles", "Goals"));
+  }
+
+  getStoryPath(): string {
+    return normalize(join(this.project.path, "Story"));
   }
 
   getRootGoals(): Array<Goal> {
@@ -220,11 +230,31 @@ export default class Story {
     return watcher;
   }
 
+  private createOrphanWatcher() {
+    const watcher = new FileWatcher({
+      path: this.getStoryPath(),
+      pattern: /story_orphanqueries_ignore_local\.txt$/
+    });
+
+    watcher.on("update", async path => {
+      await this.orphanQueries.loadLocal(path);
+      this.analyzeGoals();
+    });
+
+    watcher.on("remove", path => {
+      this.orphanQueries.removeLocal();
+    });
+
+    watcher.scanAndStartSync();
+    return watcher;
+  }
+
   private createWatchers(): Array<FileWatcher> {
     const watchers: Array<FileWatcher> = [];
 
     try {
       watchers.push(this.createGoalWatcher());
+      watchers.push(this.createOrphanWatcher());
     } catch (error) {
       this.project.projects.emit("showError", error.message);
     }
@@ -292,6 +322,8 @@ export default class Story {
           })
         );
       }
+
+      await this.orphanQueries.loadDependency(mod);
     }
 
     this.resources.push(...resources);

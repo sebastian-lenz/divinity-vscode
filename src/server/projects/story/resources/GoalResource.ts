@@ -1,7 +1,10 @@
 import { basename } from "path";
 
 import GoalParser from "../../../parsers/story/GoalParser";
-import { DiagnosticType } from "../../../parsers/story/models/diagnostics";
+import {
+  DiagnosticType,
+  Diagnostic
+} from "../../../parsers/story/models/diagnostics";
 import { StoryGoalNode } from "../../../parsers/story/models/nodes";
 
 import FileResource, { FileResourceOptions } from "./FileResource";
@@ -17,6 +20,8 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
   readonly goal: Goal;
   readonly headerGoal: boolean;
   readonly story: Story;
+
+  private syntaxDiagnostics: Array<Diagnostic> = [];
 
   constructor(options: GoalResourceOptions) {
     super(options);
@@ -34,12 +39,14 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
   }
 
   async analyze() {
+    const { syntaxDiagnostics } = this;
     const node = await this.getRootNode(true);
 
-    this.setDiagnostics(
-      DiagnosticType.Analyzer,
-      await this.story.analyzers.apply(this, node)
-    );
+    this.diagnostics = syntaxDiagnostics;
+    this.setDiagnostics([
+      ...syntaxDiagnostics,
+      ...(await this.story.analyzers.apply(this, node))
+    ]);
   }
 
   dispose() {
@@ -77,6 +84,7 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
     const { goal, story } = this;
     const parser = new GoalParser(source);
     const { diagnostics, goal: node } = parser.parse();
+    this.syntaxDiagnostics = diagnostics;
 
     if (noAnalysis) {
       story.symbols.assignSymbols(node);
@@ -100,7 +108,7 @@ export default class GoalResource extends FileResource<StoryGoalNode> {
         ...(await story.analyzers.apply(this, node))
       ]);
     } else {
-      this.setDiagnostics(DiagnosticType.Syntax, diagnostics);
+      this.setDiagnostics(diagnostics);
     }
 
     return node;

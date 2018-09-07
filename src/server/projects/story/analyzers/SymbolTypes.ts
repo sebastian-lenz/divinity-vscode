@@ -80,10 +80,14 @@ export default class SymbolTypesAnalyzer extends SyncAnalyzer {
 
     // Database warnings
     if (symbol.type === SymbolType.Database) {
-      if (symbol.isDead || !symbol.dbWrites) {
+      const { orphanQueries } = resource.story;
+      if (
+        (symbol.isDead || !symbol.dbWrites) &&
+        !orphanQueries.isOrphan(symbol)
+      ) {
         this.addDiagnostic(node, msgDatabaseNoWrite({ symbol }));
         return true;
-      } else if (!symbol.dbReads && symbol.searchName !== "db_noop") {
+      } else if (!symbol.dbReads && !orphanQueries.isOrphan(symbol)) {
         this.addDiagnostic(node, msgDatabaseNoRead({ symbol }));
         return true;
       }

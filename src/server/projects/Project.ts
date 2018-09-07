@@ -1,7 +1,9 @@
 import Levels from "./levels/index";
 import Projects from ".";
 import Story from "./story";
+import { AnyFile } from "../parsers/pak/DataIndex";
 import { ProjectInfo, ProjectMetaInfo } from "../../shared/notifications";
+import { readFile } from "../../shared/fs";
 
 export default class Project implements ProjectInfo {
   readonly levels: Levels;
@@ -32,5 +34,13 @@ export default class Project implements ProjectInfo {
 
   async initialize() {
     return this.story.initialize();
+  }
+
+  async load(file: AnyFile): Promise<string> {
+    if (file.type === "local") {
+      return readFile(file.path, { encoding: "utf-8" });
+    } else {
+      return this.projects.dataIndex.loadTextFile(file);
+    }
   }
 }

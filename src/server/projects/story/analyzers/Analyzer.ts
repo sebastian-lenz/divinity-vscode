@@ -37,7 +37,7 @@ export abstract class Analyzer {
       endPosition: range.endPosition,
       startOffset: range.startOffset,
       startPosition: range.startPosition,
-      type: DiagnosticType.Syntax
+      type: DiagnosticType.Analyzer
     });
   }
 }

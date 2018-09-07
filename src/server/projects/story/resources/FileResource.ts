@@ -23,12 +23,7 @@ export default abstract class FileResource<
   }
 
   async getSource(): Promise<string> {
-    if (this.file.type === "local") {
-      return readFile(this.path, { encoding: "utf-8" });
-    } else {
-      const { dataIndex } = this.story.project.projects;
-      return dataIndex.loadTextFile(this.file);
-    }
+    return this.story.project.load(this.file);
   }
 
   getSourceSync(): string {

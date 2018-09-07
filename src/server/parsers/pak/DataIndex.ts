@@ -1,7 +1,7 @@
 import { extname, join, basename } from "path";
 import { inflateSync } from "zlib";
 
-import { close, readDir, stat, open } from "../../../shared/fs";
+import { close, readDir, stat, open, exists } from "../../../shared/fs";
 import Parser, { PackedFile } from "./Parser";
 import readBlock from "./utils/readBlock";
 import { CompressionMethod } from "../lsf/utils/compressionMethod";
@@ -19,6 +19,7 @@ const ignored = [
 
 const goalRegExp = /Mods\/([^\/]+)\/Story\/RawFiles\/Goals\/(.*)/;
 const levelRegExp = /Mods\/([^\/]+)\/(Levels|Globals)\/([^\/]+)\/(Items)\/_merged.lsf/;
+const orphanQueriesRegExp = /Mods\/([^\/]+)\/Story\/story_orphanqueries_ignore_local\.txt/;
 const storyHeaderRegExp = /Mods\/Shared\/Story\/RawFiles\/story_header\.div/;
 
 export type AnyFile = PackedFile | LocalFile;
@@ -36,6 +37,7 @@ export interface ModData {
   goals: ModGoalMap;
   localPath?: string;
   name: string;
+  orphanQueries?: AnyFile;
 }
 
 export default class DataIndex extends Parser {
@@ -53,9 +55,16 @@ export default class DataIndex extends Parser {
       mod.goals[goalName] = file;
     }
 
-    const level = levelRegExp.exec(name);
-    if (level) {
+    const orphanQueries = orphanQueriesRegExp.exec(name);
+    if (orphanQueries) {
+      const mod = this.getPackedMod(orphanQueries[1]);
+      mod.orphanQueries = file;
     }
+
+    // TODO
+    // const level = levelRegExp.exec(name);
+    // if (level) {
+    // }
 
     const storyHeader = storyHeaderRegExp.exec(name);
     if (storyHeader) {
@@ -154,6 +163,7 @@ export default class DataIndex extends Parser {
 
   protected async loadLocalMod(name: string, path: string): Promise<ModData> {
     let goals: ModGoalMap = {};
+    let orphanQueries: AnyFile | undefined;
 
     try {
       const goalPath = join(path, "Story", "RawFiles", "Goals");
@@ -168,9 +178,22 @@ export default class DataIndex extends Parser {
           };
         }
       }
+
+      const orphanQueriesPath = join(
+        path,
+        "Story",
+        "story_orphanqueries_ignore_local.txt"
+      );
+
+      if (await exists(orphanQueriesPath)) {
+        orphanQueries = {
+          path: orphanQueriesPath,
+          type: "local"
+        };
+      }
     } catch (e) {}
 
-    return { goals, localPath: path, name };
+    return { goals, localPath: path, name, orphanQueries };
   }
 
   protected async loadPackage(file: string) {

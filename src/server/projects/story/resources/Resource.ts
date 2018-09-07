@@ -148,15 +148,8 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
     }
   }
 
-  protected setDiagnostics(
-    type: DiagnosticType,
-    diagnostics: Array<Diagnostic>
-  ) {
-    this.diagnostics = [
-      ...this.diagnostics.filter(diagnostics => diagnostics.type !== type),
-      ...diagnostics
-    ];
-
+  protected setDiagnostics(diagnostics: Array<Diagnostic>) {
+    this.diagnostics = diagnostics;
     this.getProjects().emit("diagnostics", this);
   }
 

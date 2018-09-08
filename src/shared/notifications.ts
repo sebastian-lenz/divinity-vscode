@@ -34,6 +34,7 @@ export interface ProjectMetaInfo extends ProjectMetaDependency {
   dependencies: Array<ProjectMetaDependency>;
   description?: string;
   gmTemplate?: string;
+  isDefinitiveMod: boolean;
   lobbyLevelName?: string;
   menuLevelName?: string;
   numPlayers?: string;

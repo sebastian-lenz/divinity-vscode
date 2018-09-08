@@ -326,15 +326,31 @@ export default class LSLib {
   }
 
   resolveEditorPath(project?: ProjectInfo): string | undefined {
-    if (!project) return undefined;
-    return normalize(
-      join(project.path, "..", "..", "..", "..", "The Divinity Engine 2")
-    );
+    if (!project) {
+      return undefined;
+    }
+
+    const segments = ["..", "..", "..", "..", "The Divinity Engine 2"];
+    if (project.meta.isDefinitiveMod) {
+      segments.unshift("..");
+      segments.push("DefEd");
+    }
+
+    const path = normalize(join(project.path, ...segments));
+    return existsSync(join(path, "DivinityEngine2.exe")) ? path : undefined;
   }
 
   resolveGamePath(project?: ProjectInfo): string | undefined {
-    if (!project) return undefined;
-    return normalize(join(project.path, "..", "..", "..", "Classic"));
+    if (!project) {
+      return undefined;
+    }
+
+    const segments = project.meta.isDefinitiveMod
+      ? ["..", "..", "..", "bin"]
+      : ["..", "..", "..", "Classic"];
+
+    const path = normalize(join(project.path, ...segments));
+    return existsSync(join(path, "EoCApp.exe")) ? path : undefined;
   }
 
   async tryReadETag(path: string): Promise<ETagData | undefined> {

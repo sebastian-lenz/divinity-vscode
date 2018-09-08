@@ -13,14 +13,16 @@ interface LSFile {
       };
     }>;
     region: Array<LSRegion> | LSRegion;
-    version: Array<{
-      $: {
-        build: string;
-        major: string;
-        minor: string;
-        revision: string;
-      };
-    }>;
+    version: Array<LSVersion> | LSVersion;
+  };
+}
+
+interface LSVersion {
+  $: {
+    build: string;
+    major: string;
+    minor: string;
+    revision: string;
   };
 }
 
@@ -133,6 +135,12 @@ export default function readProjectMetaInfo(data: LSFile): ProjectMetaInfo {
   if (!root || !root.children) {
     throw new Error("Invalid project metadata.");
   }
+
+  const version = Array.isArray(data.save.version)
+    ? data.save.version[0]
+    : data.save.version;
+  result.isDefinitiveMod =
+    parseInt(version.$.major) >= 3 && parseInt(version.$.minor) >= 6;
 
   for (const node of readChildNodes(root)) {
     if (node.$.id === "ModuleInfo") {

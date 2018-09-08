@@ -21,6 +21,7 @@ import Client from "../../Client";
 import debounce from "../../../server/utils/debounce";
 import Feature from "../Feature";
 import { LSLibFile } from "../../utils/LSLib";
+
 import {
   projectAddedEvent,
   ProjectInfo,
@@ -88,6 +89,11 @@ export default class TaskProviderFeature extends Feature
 
     for (const project of projects) {
       for (const [caption, mode] of modes) {
+        // Disable reloading for DE mods
+        if (project.meta.isDefinitiveMod && mode !== ReloadMode.None) {
+          continue;
+        }
+
         const definition: DivinityTaskDefinition = {
           debugInfo: join(project.path, "Story", "story.debugInfo"),
           gameDataPath: normalize(join(project.path, "..", "..")),

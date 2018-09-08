@@ -118,6 +118,8 @@ You can safely ignore the header section, it will be the same for all your goals
 
 ## Known issues
 
+- The reload commands for the Definitive Edition editor do not work, this is a bug in the editor. The `Compile and reload` tasks
+  are disabled till this problem is solved.
 - The code examples in the API explorer use a different syntax highlighting, see  
   https://github.com/Microsoft/vscode/issues/56356
 

@@ -46,7 +46,10 @@ export default class DebugProviderFeature extends Feature
     debug.registerDebugConfigurationProvider("osiris", this);
   }
 
-  async getDebugInfoPath(): Promise<string | null> {
+  async getDebugInfoPath(): Promise<{
+    debugInfoPath: string;
+    modUuid: string;
+  } | null> {
     const projects = this.client.getProjects();
     let project: ProjectInfo | undefined;
 
@@ -62,7 +65,12 @@ export default class DebugProviderFeature extends Feature
       project = projects[0];
     }
 
-    return project ? join(project.path, "Story", "story.debugInfo") : null;
+    return project
+      ? {
+          debugInfoPath: join(project.path, "Story", "story.debugInfo"),
+          modUuid: project.meta.uuid
+        }
+      : null;
   }
 
   /**
@@ -115,13 +123,27 @@ export default class DebugProviderFeature extends Feature
       debugConfiguration.backendPort = 9999;
     }
 
-    if (!("debugInfoPath" in debugConfiguration)) {
-      const debugInfoPath = await this.getDebugInfoPath();
-      if (!debugInfoPath) {
-        return null;
-      }
+    if (
+      !("debugInfoPath" in debugConfiguration) ||
+      !("modUuid" in debugConfiguration)
+    ) {
+      const meta = await this.getDebugInfoPath();
 
-      debugConfiguration.debugInfoPath = debugInfoPath;
+      if (meta) {
+        const { debugInfoPath, modUuid } = meta;
+
+        if (!("debugInfoPath" in debugConfiguration)) {
+          debugConfiguration.debugInfoPath = debugInfoPath;
+        }
+
+        if (!("modUuid" in debugConfiguration)) {
+          debugConfiguration.modUuid = modUuid;
+        }
+      }
+    }
+
+    if (!("debugInfoPath" in debugConfiguration)) {
+      return null;
     }
 
     return debugConfiguration;

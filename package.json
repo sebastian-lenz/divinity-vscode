@@ -290,6 +290,10 @@
                 "type": "number",
                 "description": "Port of debugger backend server"
               },
+              "modUuid": {
+                "type": "string",
+                "description": "The uuid of the mod beeing debugged"
+              },
               "dbgOptions": {
                 "type": "object",
                 "description": "Debugger custom overrides",

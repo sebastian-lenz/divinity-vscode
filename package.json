@@ -213,6 +213,7 @@
       {
         "type": "divinity.task.compiler",
         "required": [
+          "game",
           "gameDataPath",
           "output",
           "mod"
@@ -229,6 +230,14 @@
           "mod": {
             "type": "array",
             "description": "Check and compile all goals from the specified mod"
+          },
+          "game": {
+            "type": "string",
+            "description": "Set the target game version.",
+            "enum": [
+              "dos2",
+              "dos2de"
+            ]
           },
           "noWarn": {
             "type": "array",

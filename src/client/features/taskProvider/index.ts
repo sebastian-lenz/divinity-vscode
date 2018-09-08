@@ -54,6 +54,7 @@ export interface DivinityTaskDefinition extends TaskDefinition {
   checkOnly?: boolean;
   debugInfo?: string;
   debugLog?: string;
+  game: "dos2" | "dos2de";
   gameDataPath: string;
   mod: Array<string>;
   noWarn?: Array<string>;
@@ -98,6 +99,7 @@ export default class TaskProviderFeature extends Feature
 
         const definition: DivinityTaskDefinition = {
           debugInfo: join(project.path, "Story", "story.debugInfo"),
+          game: project.meta.isDefinitiveMod ? "dos2de" : "dos2",
           gameDataPath: normalize(join(project.path, "..", "..")),
           mod: [
             "Shared",
@@ -228,6 +230,7 @@ export default class TaskProviderFeature extends Feature
       checkOnly,
       debugInfo,
       debugLog,
+      game,
       gameDataPath,
       mod,
       noWarn,
@@ -238,7 +241,9 @@ export default class TaskProviderFeature extends Feature
       "--game-data-path",
       quotedString(gameDataPath.replace(/[\/\\]$/, "")),
       "--output",
-      quotedString(output)
+      quotedString(output),
+      "--game",
+      quotedString(game)
     ];
 
     if (debugInfo) {

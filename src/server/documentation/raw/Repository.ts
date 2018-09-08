@@ -29,7 +29,6 @@ export default class Repository {
     const rimraf = require("rimraf");
     const cachePath = join(this.path, "cache");
     rimraf.sync(`${cachePath}${sep}*`);
-    mkdirSync(cachePath);
 
     const docs = new Documentation();
     docs.repository = this;

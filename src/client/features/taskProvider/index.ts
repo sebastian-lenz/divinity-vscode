@@ -53,6 +53,7 @@ export interface DivinityTaskDefinition extends TaskDefinition {
   checkNames?: boolean;
   checkOnly?: boolean;
   debugInfo?: string;
+  debugLog?: string;
   gameDataPath: string;
   mod: Array<string>;
   noWarn?: Array<string>;
@@ -211,6 +212,7 @@ export default class TaskProviderFeature extends Feature
       checkNames,
       checkOnly,
       debugInfo,
+      debugLog,
       gameDataPath,
       mod,
       noWarn,
@@ -226,6 +228,10 @@ export default class TaskProviderFeature extends Feature
 
     if (debugInfo) {
       args.push("--debug-info", quotedString(debugInfo));
+    }
+
+    if (debugLog) {
+      args.push("--debug-log", quotedString(debugLog));
     }
 
     for (const modName of mod) {

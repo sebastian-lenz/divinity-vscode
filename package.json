@@ -249,6 +249,10 @@
             "type": "string",
             "description": "Debugging symbols path"
           },
+          "debugLog": {
+            "type": "string",
+            "description": "Debugging log path"
+          },
           "reload": {
             "type": "string",
             "description": "Turns on editor level reloading.",

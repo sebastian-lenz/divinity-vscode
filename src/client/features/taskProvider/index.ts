@@ -1,6 +1,5 @@
 import { join, normalize } from "path";
 import {
-  Disposable,
   ProgressLocation,
   ShellExecution,
   ShellQuotedString,
@@ -42,7 +41,7 @@ const taskTitle = "Divinity";
 const reloadTaskTitle = "Reload editor";
 const compilerTaskType = "divinity.task.compiler";
 const reloadTaskType = "divinity.task.reload";
-const problemMatcher = "divinity.problemMatcher";
+const problemMatcher = "$divinity.problemMatcher";
 
 export const enum ReloadMode {
   None = "",
@@ -80,10 +79,13 @@ export default class TaskProviderFeature extends Feature
 
   async createTasks() {
     const { projects } = this;
-    const tasks: Array<Task> = [];
+    const result: Array<Task> = [];
+    const compilerLogPath = workspace
+      .getConfiguration("divinity")
+      .get<string>("compilerLogPath");
 
     if (!this.getCompilerPath()) {
-      this.tasks = tasks;
+      this.tasks = result;
       return;
     }
 
@@ -103,9 +105,16 @@ export default class TaskProviderFeature extends Feature
             project.meta.folder
           ],
           output: join(project.path, "Story", "story.div.osi"),
-          reload: mode,
           type: compilerTaskType
         };
+
+        if (mode !== ReloadMode.None) {
+          definition.reload = mode;
+        }
+
+        if (compilerLogPath) {
+          definition.debugLog = compilerLogPath;
+        }
 
         const task = new Task(definition, caption, project.meta.name);
         task.group = TaskGroup.Build;
@@ -116,12 +125,12 @@ export default class TaskProviderFeature extends Feature
 
         const resolved = await this.resolveTask(task);
         if (resolved) {
-          tasks.push(resolved);
+          result.push(resolved);
         }
       }
     }
 
-    this.tasks = tasks;
+    this.tasks = result;
   }
 
   getCompilerPath(): string | undefined {

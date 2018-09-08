@@ -44,6 +44,11 @@
           "scope": "window",
           "type": "string",
           "description": "Set the path to the custom compiler."
+        },
+        "divinity.compilerLogPath": {
+          "scope": "window",
+          "type": "string",
+          "description": "Set the path to which the compiler log is written."
         }
       }
     },

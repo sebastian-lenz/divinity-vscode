@@ -21,7 +21,7 @@ export default function parseUri(uri: string): ParsedUri {
     };
   }
 
-  const match = /divinity:\/([^/]+)\/(.*?)\.divGoal/.exec(uri);
+  const match = /divinity:\/([^/]+)\/(.*?)\.divGoal/i.exec(uri);
   if (match) {
     return {
       goal: match[2],

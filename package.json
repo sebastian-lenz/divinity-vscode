@@ -4,7 +4,7 @@
   "description": "VS Code language support for Divinity Engine story scripts",
   "author": "Sebastian Lenz",
   "license": "MIT",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "sebastian-lenz",
   "categories": [
     "Programming Languages"
@@ -65,7 +65,7 @@
       },
       {
         "command": "divinity.installDebugger",
-        "title": "Install LSLib Debugger for editor or game",
+        "title": "Copy LSLib Debugger to editor or game",
         "category": "Divinity"
       },
       {

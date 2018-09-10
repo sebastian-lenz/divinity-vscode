@@ -15,6 +15,6 @@ export default function msgStringLtGtComparison({
   return {
     code: DiagnosticCode.StringLtGtComparison,
     message: `String comparison using operator ${operator} - probably a mistake?`,
-    severity: DiagnosticSeverity.Error
+    severity: DiagnosticSeverity.Warning
   };
 }

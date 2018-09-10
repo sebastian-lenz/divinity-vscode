@@ -9,7 +9,11 @@ import SymbolTypesAnalyzer from "./SymbolTypes";
 import SyntaxErrorAnalyzer from "./SyntaxError";
 import { AnyAnalyzer, AnalyzerContext, SyncAnalyzer } from "./Analyzer";
 import { Diagnostic } from "../../../parsers/story/models/diagnostics";
-import { StoryGoalNode, AnyNode } from "../../../parsers/story/models/nodes";
+import {
+  StoryGoalNode,
+  AnyNode,
+  NodeType
+} from "../../../parsers/story/models/nodes";
 import {
   isInScope,
   Scope,
@@ -76,7 +80,7 @@ export default class Analyzers {
           didEmitDiagnostic = await worker.analyze(context);
         }
 
-        if (didEmitDiagnostic) {
+        if (didEmitDiagnostic && node.type !== NodeType.Rule) {
           skipNode = node;
           break;
         }

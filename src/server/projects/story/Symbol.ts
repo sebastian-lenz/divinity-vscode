@@ -249,12 +249,20 @@ export default class Symbol {
       if (index !== -1) {
         dbWrites.splice(index, 1);
       }
+
+      if (dbWrites.length === 0) {
+        this.dbWrites = null;
+      }
     }
 
     if (dbReads) {
       index = dbReads.indexOf(goal);
       if (index !== -1) {
         dbReads.splice(index, 1);
+      }
+
+      if (dbReads.length === 0) {
+        this.dbReads = null;
       }
     }
 

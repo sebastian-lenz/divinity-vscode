@@ -121,6 +121,20 @@ export const enum DiagnosticCode {
   // Multiple definitions seen for the same function with different signatures.
   ProcTypeMismatch = "E30",
 
+  // Attempted to cast a type to an unrelated/incompatible type (i.e. STRING to INTEGER)
+  CastToUnrelatedType = "E31",
+
+  // Attempted to cast an alias to an unrelated alias (i.e. CHARACTERGUID to ITEMGUID)
+  // CastToUnrelatedGuidAlias = "W32",
+
+  // Left-hand side and right-hand side variables are the same in a binary operation.
+  // This will result in an "invalid compare" error in runtime.
+  BinaryOperationSameRhsLhs = "E33",
+
+  // comparison on types that have known bugs or side effects
+  // (currently this only triggers on GUIDSTRING - STRING comparison)
+  // RiskyComparison = "E34",
+
   // Custom
   // ---------------------------------
   InvalidToken = "E1000",

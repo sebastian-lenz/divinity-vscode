@@ -19,17 +19,17 @@ export default function msgInvalidTypeCast({
 }: Params): DiagnosticMessage {
   let message: string;
   if (name) {
-    message = `Rule variable "${name}" of type ${printParameterType(
+    message = `Cannot cast ${printParameterType(
       sourceType
-    )} cannot be converted to ${printParameterType(targetType)}`;
+    )} variable "${name}" to unrelated type ${printParameterType(targetType)}`;
   } else {
-    message = `Type ${printParameterType(
+    message = `Cannot cast ${printParameterType(
       sourceType
-    )} cannot be converted to ${printParameterType(targetType)}`;
+    )} to unrelated type ${printParameterType(targetType)}`;
   }
 
   return {
-    code: DiagnosticCode.LocalTypeMismatch,
+    code: DiagnosticCode.CastToUnrelatedType,
     message,
     severity: DiagnosticSeverity.Error
   };

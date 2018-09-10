@@ -1,4 +1,7 @@
+import getAnnotatedType from "../utils/getAnnotatedType";
+import msgBinaryOperationSameRhsLhs from "../messages/msgBinaryOperationSameRhsLhs";
 import msgComparisonTypeMismatch from "../messages/msgComparisonTypeMismatch";
+import msgDangerousCast from "../messages/msgDangerousCast";
 import msgInvalidPlaceholder from "../messages/msgInvalidPlaceholder";
 import msgInvalidTypeCast from "../messages/msgInvalidTypeCast";
 import msgInvalidVariableName from "../messages/msgInvalidVariableName";
@@ -25,8 +28,6 @@ import {
   ParameterNode,
   OperatorNode
 } from "../../../parsers/story/models/nodes";
-import msgDangerousCast from "../messages/msgDangerousCast";
-import getAnnotatedType from "../utils/getAnnotatedType";
 
 const enum ArgumentMode {
   Constant,
@@ -186,6 +187,14 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
           targetType: rightType
         })
       );
+    }
+
+    if (
+      operator.leftOperant.type === NodeType.Identifier &&
+      operator.rightOperant.type === NodeType.Identifier &&
+      operator.leftOperant.name === operator.rightOperant.name
+    ) {
+      this.addDiagnostic(operator, msgBinaryOperationSameRhsLhs());
     }
 
     if (

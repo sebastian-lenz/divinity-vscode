@@ -161,6 +161,7 @@ export default class Story {
 
     if (!isOverride && goal.overrides) {
       this.goals.push(goal.overrides);
+      goal.overrides = null;
     }
 
     this.updateTree();

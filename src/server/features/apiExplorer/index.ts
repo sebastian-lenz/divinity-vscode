@@ -1,4 +1,4 @@
-import { compile, registerPartial, registerHelper } from "handlebars";
+import { compile, registerPartial } from "handlebars";
 import { join } from "path";
 
 import CategoryHandler from "./CategoryHandler";
@@ -8,9 +8,16 @@ import Handler from "./Handler";
 import Project from "../../projects/Project";
 import runSafeAsync from "../../utils/runSafeAsync";
 import Server from "../../Server";
-import { apiRequest, ApiResult } from "../../../shared/requests";
+import Symbol from "../../projects/story/Symbol";
 import { Feature } from "..";
 import { readFile } from "../../../shared/fs";
+
+import {
+  apiRequest,
+  ApiResult,
+  apiLocationRequest,
+  ApiLocationParams
+} from "../../../shared/requests";
 
 export default class ApiExplorerFeature extends Feature {
   handlers: Array<Handler> | undefined;
@@ -21,11 +28,21 @@ export default class ApiExplorerFeature extends Feature {
     super(server);
 
     const { connection } = server;
+
     connection.onRequest(apiRequest, (location, token) =>
       runSafeAsync(
         () => this.handleApiRequest(location),
         null,
         `Error while fetching api ${location}`,
+        token
+      )
+    );
+
+    connection.onRequest(apiLocationRequest, (params, token) =>
+      runSafeAsync(
+        () => this.handleApiLocationRequest(params),
+        null,
+        `Error while fetching api location for ${params.uri}`,
         token
       )
     );
@@ -82,6 +99,27 @@ export default class ApiExplorerFeature extends Feature {
     }
 
     return null;
+  }
+
+  async handleApiLocationRequest(params: ApiLocationParams): Promise<string> {
+    const { node, resource, symbol } = await this.getSymbolAt(params);
+    if (!node || !resource || !symbol) {
+      return "/";
+    }
+
+    let systemSymbol: Symbol | undefined;
+    if (symbol.isSystem) {
+      systemSymbol = symbol;
+    } else if (resource) {
+      const symbols = resource.story.symbols.findSymbols(symbol.name);
+      systemSymbol = symbols.find(symbol => symbol.isSystem);
+    }
+
+    if (systemSymbol) {
+      return `/definition/${systemSymbol.name}`;
+    }
+
+    return "/";
   }
 
   async loadPartial(name: string) {

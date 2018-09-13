@@ -168,6 +168,13 @@
           "when": "view == divinity.storyOutline && viewItem != sharedGoal",
           "group": "1_modification"
         }
+      ],
+      "editor/context": [
+        {
+          "command": "divinity.showApiExplorer",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        }
       ]
     },
     "grammars": [

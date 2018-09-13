@@ -1,7 +1,7 @@
 import { join } from "path";
-import { LanguageClient, Disposable } from "vscode-languageclient";
 import {
   commands,
+  Disposable,
   Uri,
   ViewColumn,
   WebviewPanel,
@@ -11,8 +11,12 @@ import {
 
 import Client from "../../Client";
 import Feature from "../Feature";
-import { apiShowEvent } from "../../../shared/notifications";
-import { apiRequest, ApiResult } from "../../../shared/requests";
+import {
+  apiRequest,
+  ApiResult,
+  apiLocationRequest,
+  ApiLocationParams
+} from "../../../shared/requests";
 
 const viewType: string = "divinity.apiExplorer";
 
@@ -27,10 +31,6 @@ export default class ApiExplorerFeature extends Feature
 
     commands.registerCommand("divinity.showApiExplorer", this.handleShowApi);
     window.registerWebviewPanelSerializer(viewType, this);
-  }
-
-  initialize(connection: LanguageClient) {
-    connection.onNotification(apiShowEvent, this.handleApiShow);
   }
 
   async deserializeWebviewPanel(panel: WebviewPanel, state: any) {
@@ -97,10 +97,6 @@ export default class ApiExplorerFeature extends Feature
     };
   }
 
-  handleApiShow = (location: string) => {
-    commands.executeCommand("divinity.showApiExplorer", location);
-  };
-
   handleMessage = (message: any) => {
     if (typeof message !== "object") return;
     const { args, command } = message;
@@ -125,7 +121,31 @@ export default class ApiExplorerFeature extends Feature
     this.panel = null;
   };
 
-  handleShowApi = (location: string = "/") => {
+  handleShowApi = async (target: string | Uri = "/") => {
+    let location: string = "/";
+
+    if (typeof target === "string") {
+      location = target;
+    } else if (
+      target instanceof Uri &&
+      window.activeTextEditor &&
+      window.activeTextEditor.document.uri.toString() === target.toString()
+    ) {
+      const { selection } = window.activeTextEditor;
+      const connection = await this.client.getConnection();
+      const params: ApiLocationParams = {
+        textDocument: {
+          uri: target.toString()
+        },
+        position: connection.code2ProtocolConverter.asPosition(selection.start)
+      };
+
+      location = await connection.sendRequest<string>(
+        apiLocationRequest,
+        params
+      );
+    }
+
     this.getPanel();
     this.navigate(location);
   };

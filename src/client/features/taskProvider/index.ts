@@ -92,6 +92,10 @@ export default class TaskProviderFeature extends Feature
 
     for (const project of projects) {
       for (const [caption, mode] of modes) {
+        if (project.meta.isDefinitiveMod && mode === ReloadMode.ReloadStory) {
+          continue;
+        }
+
         const definition: DivinityTaskDefinition = {
           debugInfo: join(project.path, "Story", "story.debugInfo"),
           game: project.meta.isDefinitiveMod ? "dos2de" : "dos2",

@@ -15,7 +15,7 @@ import {
 import Client from "../../Client";
 import goalTemplate from "../../../shared/goalTemplate";
 import { Feature } from "..";
-import { unlink, writeFile, rename } from "../../../shared/fs";
+import { exists, unlink, writeFile, rename } from "../../../shared/fs";
 
 import {
   goalsChangedEvent,
@@ -30,7 +30,10 @@ import {
   RenameGoalResult,
   MoveGoalParams,
   MoveGoalResult,
-  moveGoalRequest
+  moveGoalRequest,
+  DivContentParams,
+  DivContentResult,
+  divContentRequest
 } from "../../../shared/requests";
 
 export default class StoryOutlineFeature extends Feature
@@ -76,6 +79,11 @@ export default class StoryOutlineFeature extends Feature
       "divinity.storyOutline.renameGoal",
       this.handleRenameGoal
     );
+
+    commands.registerCommand(
+      "divinity.storyOutline.copyGoal",
+      this.handleCopyGoal
+    );
   }
 
   initialize(connection: LanguageClient) {
@@ -92,6 +100,37 @@ export default class StoryOutlineFeature extends Feature
     }
 
     return result;
+  }
+
+  async createGoal(
+    name: string | undefined,
+    content: string,
+    ignoreExisting?: boolean
+  ) {
+    name = this.validateNewGoalName(name, ignoreExisting);
+    if (!name) return;
+
+    const fileName = this.getGoalFileName(name);
+    if (!fileName) {
+      window.showErrorMessage("Cannot create goal: No project opened.");
+      return;
+    }
+
+    if (await exists(fileName)) {
+      window.showErrorMessage(
+        "Cannot create goal: Target file already exists."
+      );
+      return;
+    }
+
+    try {
+      await writeFile(fileName, content);
+    } catch (error) {
+      window.showErrorMessage(`Cannot create goal: ${error.message}`);
+      return;
+    }
+
+    window.showTextDocument(Uri.file(fileName));
   }
 
   createIcon(name: string) {
@@ -174,28 +213,39 @@ export default class StoryOutlineFeature extends Feature
       prompt: "Enter the name of the new goal:"
     });
 
-    name = this.validateNewGoalName(name);
-    if (!name) return;
+    await this.createGoal(
+      name,
+      goalTemplate({
+        parents: goal ? [goal.name] : undefined
+      })
+    );
+  };
 
-    const fileName = this.getGoalFileName(name);
-    if (!fileName) {
-      window.showErrorMessage("Cannot create goal: No project opened.");
+  handleCopyGoal = async (goal?: GoalInfo | null) => {
+    if (!goal) return;
+
+    goal = this.findGoal(goal.name);
+    if (!goal || !goal.isShared) {
+      window.showErrorMessage("This goal cannot be copied to your mod.");
       return;
     }
 
-    try {
-      await writeFile(
-        fileName,
-        goalTemplate({
-          parents: goal ? [goal.name] : undefined
-        })
-      );
-    } catch (error) {
-      window.showErrorMessage(`Cannot create goal: ${error.message}`);
+    const connection = await this.client.getConnection();
+    const params: DivContentParams = {
+      uri: goal.uri
+    };
+
+    const result = await connection.sendRequest<DivContentResult | null>(
+      divContentRequest,
+      params
+    );
+
+    if (!result) {
+      window.showErrorMessage("The goal could not be loaded.");
       return;
     }
 
-    window.showTextDocument(Uri.file(fileName));
+    await this.createGoal(goal.name, result.content, true);
   };
 
   handleDeleteGoal = async (goal?: GoalInfo | null) => {
@@ -210,6 +260,7 @@ export default class StoryOutlineFeature extends Feature
     const goalsToDelete = this.collectChildren(goal).filter(
       goal => !goal.isShared
     );
+
     goalsToDelete.push(goal);
 
     if (goalsToDelete.length > 1) {
@@ -337,7 +388,10 @@ export default class StoryOutlineFeature extends Feature
     }
   };
 
-  validateNewGoalName(name: string | undefined): string | undefined {
+  validateNewGoalName(
+    name: string | undefined,
+    ignoreExisting?: boolean
+  ): string | undefined {
     if (!name) return undefined;
     if (name.endsWith(".txt")) {
       name = name.substr(0, name.length - 4);
@@ -348,10 +402,12 @@ export default class StoryOutlineFeature extends Feature
       return undefined;
     }
 
-    const existingGoal = this.findGoal(name);
-    if (existingGoal) {
-      window.showErrorMessage(`The goal "${name}" already exists.`);
-      return undefined;
+    if (!ignoreExisting) {
+      const existingGoal = this.findGoal(name);
+      if (existingGoal) {
+        window.showErrorMessage(`The goal "${name}" already exists.`);
+        return undefined;
+      }
     }
 
     return name;

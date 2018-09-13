@@ -42,7 +42,11 @@ export default class Story {
   }
 
   addGoal(goal: Goal) {
-    this.removeGoalByName(goal.name);
+    const overrides = this.findGoal(goal.name);
+    if (overrides) {
+      this.removeGoal(overrides, true);
+      goal.overrides = overrides;
+    }
 
     const { goals } = this;
     goals.push(goal);
@@ -151,16 +155,15 @@ export default class Story {
     this.watchers = this.createWatchers();
   }
 
-  removeGoal(goal: Goal) {
+  removeGoal(goal: Goal, isOverride?: boolean) {
     this.goals = this.goals.filter(existingGoal => existingGoal !== goal);
     this.symbols.removeByGoal(goal);
-    this.updateTree();
-  }
 
-  removeGoalByName(name: string) {
-    this.goals
-      .filter(goal => goal.name === name)
-      .forEach(goal => this.removeGoal(goal));
+    if (!isOverride && goal.overrides) {
+      this.goals.push(goal.overrides);
+    }
+
+    this.updateTree();
   }
 
   removeResource(resource: Resource) {

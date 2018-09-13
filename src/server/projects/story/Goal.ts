@@ -3,6 +3,7 @@ import sortGoals from "./utils/sortGoals";
 import Story from ".";
 
 export default class Goal {
+  overrides: Goal | null = null;
   parents: Array<string> = [];
   weight: number = 0;
   readonly name: string;

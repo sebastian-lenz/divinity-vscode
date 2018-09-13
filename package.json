@@ -81,27 +81,38 @@
       {
         "command": "divinity.storyOutline.openGoal",
         "title": "Open Goal",
-        "category": "Divinity"
+        "category": "Divinity",
+        "when": "viewItem == sharedGoal || viewItem == customGoal"
       },
       {
         "command": "divinity.storyOutline.addGoal",
         "title": "Add new Goal",
-        "category": "Divinity"
+        "category": "Divinity",
+        "when": "viewItem == sharedGoal || viewItem == customGoal"
       },
       {
         "command": "divinity.storyOutline.renameGoal",
         "title": "Rename Goal",
-        "category": "Divinity"
+        "category": "Divinity",
+        "when": "viewItem == customGoal"
       },
       {
         "command": "divinity.storyOutline.deleteGoal",
         "title": "Delete Goal",
-        "category": "Divinity"
+        "category": "Divinity",
+        "when": "viewItem == customGoal"
       },
       {
         "command": "divinity.storyOutline.moveGoal",
         "title": "Move Goal",
-        "category": "Divinity"
+        "category": "Divinity",
+        "when": "viewItem == customGoal"
+      },
+      {
+        "command": "divinity.storyOutline.copyGoal",
+        "title": "Copy Goal to my Mod",
+        "category": "Divinity",
+        "when": "viewItem == sharedGoal"
       }
     ],
     "languages": [
@@ -166,6 +177,11 @@
         {
           "command": "divinity.storyOutline.moveGoal",
           "when": "view == divinity.storyOutline && viewItem != sharedGoal",
+          "group": "1_modification"
+        },
+        {
+          "command": "divinity.storyOutline.copyGoal",
+          "when": "view == divinity.storyOutline && viewItem == sharedGoal",
           "group": "1_modification"
         }
       ],

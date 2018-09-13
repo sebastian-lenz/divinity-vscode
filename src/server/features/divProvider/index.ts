@@ -1,34 +1,36 @@
-import { Connection } from "vscode-languageserver/lib/main";
+import { Connection } from "vscode-languageserver";
 
 import Feature from "../Feature";
+
 import {
-  divRequestEvent,
-  divRequestResultEvent,
-  DivRequestResult
-} from "../../../shared/notifications";
+  divContentRequest,
+  DivContentParams,
+  DivContentResult
+} from "../../../shared/requests";
 
 export default class DivProviderFeature extends Feature {
   initialize(connection: Connection): void {
-    connection.onNotification(divRequestEvent, this.handleDivRequest);
+    connection.onRequest(divContentRequest, this.handleDivRequest);
   }
 
-  handleDivRequest = async (uri: string) => {
+  handleDivRequest = async ({
+    uri
+  }: DivContentParams): Promise<DivContentResult | null> => {
     const { connection, projects } = this.server;
     if (!connection) {
-      return;
+      return null;
     }
 
-    let content: string | null = null;
     const resource = await projects.findResource(uri);
-    if (resource) {
-      content = await resource.getSource();
+    if (!resource) {
+      return null;
     }
 
-    const result: DivRequestResult = {
-      content,
+    const result: DivContentResult = {
+      content: await resource.getSource(),
       uri
     };
 
-    connection.sendNotification(divRequestResultEvent, result);
+    return result;
   };
 }

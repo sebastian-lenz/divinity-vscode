@@ -1,13 +1,5 @@
-export const apiShowEvent = "divinity/apiShow";
-export const divRequestEvent = "divinity/divRequest";
-export const divRequestResultEvent = "divinity/divRequestResult";
 export const goalsChangedEvent = "divinity/goalsChanged";
 export const readyEvent = "divinity/ready";
-
-export interface DivRequestResult {
-  content: string | null;
-  uri: string;
-}
 
 export interface GoalsChanged {
   goals: Array<GoalInfo>;

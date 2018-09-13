@@ -1,4 +1,7 @@
-import { WorkspaceEdit } from "vscode-languageclient";
+import {
+  WorkspaceEdit,
+  TextDocumentPositionParams
+} from "vscode-languageclient";
 
 // API request
 
@@ -8,6 +11,12 @@ export interface ApiResult {
   content: string;
   location: string;
 }
+
+// API location request
+
+export const apiLocationRequest = "divinity/apiLocation";
+
+export interface ApiLocationParams extends TextDocumentPositionParams {}
 
 // Rename goal
 
@@ -35,4 +44,17 @@ export interface MoveGoalParams {
 
 export interface MoveGoalResult extends WorkspaceEdit {
   error?: string;
+}
+
+// Div content request
+
+export const divContentRequest = "divinity/divContent";
+
+export interface DivContentParams {
+  uri: string;
+}
+
+export interface DivContentResult {
+  content: string;
+  uri: string;
 }

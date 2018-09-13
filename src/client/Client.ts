@@ -11,8 +11,9 @@ import {
 
 import features, { Feature } from "./features";
 import LSLib, { LSLibFile } from "./utils/LSLib";
-import { readyEvent, ProjectInfo } from "../shared/notifications";
+import StoryOutlineFeature from "./features/storyOutline";
 import TaskProviderFeature from "./features/taskProvider";
+import { readyEvent, ProjectInfo, GoalInfo } from "../shared/notifications";
 
 export default class Client extends EventEmitter {
   clientId = "osiris-language-server";
@@ -126,5 +127,17 @@ export default class Client extends EventEmitter {
     }
 
     return taskProvider.projects;
+  }
+
+  getRootGoals(): Array<GoalInfo> {
+    const storyOutline = this.features.find(
+      feature => feature instanceof StoryOutlineFeature
+    ) as StoryOutlineFeature | undefined;
+
+    if (!storyOutline || storyOutline.rootGoals.length === 0) {
+      return [];
+    }
+
+    return storyOutline.rootGoals;
   }
 }

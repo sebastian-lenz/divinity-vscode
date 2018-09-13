@@ -10,6 +10,7 @@ import DocumentSymbolsFeature from "./documentSymbols";
 import HoverFeature from "./hover";
 import ReferencesFeature from "./references";
 import RenameFeature from "./rename";
+import SearchFeature from "./search";
 import SignatureHelpFeature from "./signatureHelp";
 import StoryOutlineFeature from "./storyOutline";
 
@@ -24,6 +25,7 @@ const factories: Array<FeatureFactory> = [
   HoverFeature,
   ReferencesFeature,
   RenameFeature,
+  SearchFeature,
   SignatureHelpFeature,
   StoryOutlineFeature
 ];

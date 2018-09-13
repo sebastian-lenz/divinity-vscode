@@ -19,6 +19,29 @@ export default class Goal {
     return this.story.getGoalsByParent(this.name);
   }
 
+  getParents(): Array<Goal> {
+    return this.parents.reduce((result, parent) => {
+      const goal = this.story.getGoal(parent);
+      if (goal) result.push(goal);
+      return result;
+    }, [] as Array<Goal>);
+  }
+
+  getPaths(): Array<string> {
+    const parents = this.getParents();
+    if (!parents.length) {
+      return [this.name];
+    }
+
+    return parents.reduce((result, parent) => {
+      const paths = parent.getPaths();
+      for (const path of paths) {
+        result.push(`${path}\\${this.name}`);
+      }
+      return result;
+    }, [] as Array<string>);
+  }
+
   getSortedChildren(): Array<Goal> {
     return this.story.getGoalsByParent(this.name).sort(sortGoals);
   }

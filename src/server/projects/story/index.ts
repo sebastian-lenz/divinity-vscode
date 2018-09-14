@@ -153,6 +153,10 @@ export default class Story {
   async initialize() {
     await this.loadDependencies();
     this.watchers = this.createWatchers();
+
+    if (this.queue.getPendingLength() === 0) {
+      this.handleQueueEmpty();
+    }
   }
 
   removeGoal(goal: Goal, isOverride?: boolean) {
@@ -261,10 +265,6 @@ export default class Story {
       watchers.push(this.createOrphanWatcher());
     } catch (error) {
       this.project.projects.emit("showError", error.message);
-    }
-
-    if (this.queue.getPendingLength() === 0) {
-      this.handleQueueEmpty();
     }
 
     return watchers;

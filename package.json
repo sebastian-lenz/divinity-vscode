@@ -20,6 +20,7 @@
     "vscode": "^1.25.0"
   },
   "activationEvents": [
+    "workspaceContains:/meta.lsx",
     "workspaceContains:**/Story/story.div",
     "workspaceContains:**/RawFiles/story_header.div",
     "onLanguage:divinity-story-goal",

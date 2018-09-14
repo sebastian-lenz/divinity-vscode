@@ -1,4 +1,5 @@
 import { join, dirname } from "path";
+import * as mkdirp from "mkdirp";
 import { LanguageClient, Event } from "vscode-languageclient";
 import {
   commands,
@@ -111,7 +112,8 @@ export default class StoryOutlineFeature extends Feature
     if (!name) return;
 
     const fileName = this.getGoalFileName(name);
-    if (!fileName) {
+    const path = this.getGoalPath();
+    if (!path || !fileName) {
       window.showErrorMessage("Cannot create goal: No project opened.");
       return;
     }
@@ -124,6 +126,7 @@ export default class StoryOutlineFeature extends Feature
     }
 
     try {
+      mkdirp.sync(path);
       await writeFile(fileName, content);
     } catch (error) {
       window.showErrorMessage(`Cannot create goal: ${error.message}`);
@@ -161,10 +164,16 @@ export default class StoryOutlineFeature extends Feature
     return null;
   }
 
-  getGoalFileName(name: string): string | undefined {
+  getGoalPath(): string | undefined {
     const { project } = this;
     if (!project) return undefined;
-    return join(project.path, "Story", "RawFiles", "Goals", `${name}.txt`);
+    return join(project.path, "Story", "RawFiles", "Goals");
+  }
+
+  getGoalFileName(name: string): string | undefined {
+    const path = this.getGoalPath();
+    if (!path) return undefined;
+    return join(path, `${name}.txt`);
   }
 
   getTreeItem(element: GoalInfo): TreeItem {

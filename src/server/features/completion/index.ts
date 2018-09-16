@@ -5,6 +5,7 @@ import {
   CompletionItemKind
 } from "vscode-languageserver";
 
+import printParameterType from "../../projects/story/utils/printParameterType";
 import printSymbol from "../../projects/story/utils/printSymbol";
 import printSymbolType from "../../projects/story/utils/printSymbolType";
 import Project from "../../projects/Project";
@@ -15,10 +16,9 @@ import Symbol from "../../projects/story/Symbol";
 import ucfirst from "../../utils/ucfirst";
 import unpackPosition from "../../parsers/story/utils/unpackPosition";
 import { Feature } from "..";
+import { isGuidType } from "../../projects/story/analyzers/Parameter";
 import { NodeType, AnyNode } from "../../parsers/story/models/nodes";
 import { SymbolType } from "../../projects/story/models/symbol";
-import printParameterType from "../../projects/story/utils/printParameterType";
-import isCallerNode from "../../parsers/story/utils/isCallerNode";
 
 const SYMBOL_DATA = "divinity.symbol:";
 
@@ -172,8 +172,13 @@ export default class CompletionFeature extends Feature {
       info.enumeration.collectCompletions(result);
     }
 
-    const { levels } = resource.story.project;
-    levels.collectCompletions(result, info.type);
+    if (isGuidType(info.type)) {
+      const { levels } = resource.story.project;
+      levels.collectCompletions(result, info.type);
+      result.push({
+        label: "NULL_00000000-0000-0000-0000-000000000000"
+      });
+    }
 
     return result;
   }

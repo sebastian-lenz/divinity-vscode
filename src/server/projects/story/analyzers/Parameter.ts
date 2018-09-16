@@ -39,11 +39,11 @@ function isDangerousCast(from: ParameterType, to: ParameterType): boolean {
   return from !== to && isGuidSubtype(from) && isGuidSubtype(to);
 }
 
-function isGuidType(type: ParameterType): boolean {
+export function isGuidType(type: ParameterType): boolean {
   return type === ParameterType.Guid || isGuidSubtype(type);
 }
 
-function isGuidSubtype(type: ParameterType): boolean {
+export function isGuidSubtype(type: ParameterType): boolean {
   return (
     type === ParameterType.CharacterGuid ||
     type === ParameterType.ItemGuid ||
@@ -53,11 +53,11 @@ function isGuidSubtype(type: ParameterType): boolean {
   );
 }
 
-function isIntegerType(type: ParameterType): boolean {
+export function isIntegerType(type: ParameterType): boolean {
   return type === ParameterType.Integer || type === ParameterType.Integer64;
 }
 
-function isNumericType(type: ParameterType): boolean {
+export function isNumericType(type: ParameterType): boolean {
   return (
     type === ParameterType.Integer ||
     type === ParameterType.Integer64 ||
@@ -65,7 +65,7 @@ function isNumericType(type: ParameterType): boolean {
   );
 }
 
-function isNumericOperator(operator: string) {
+export function isNumericOperator(operator: string) {
   return (
     operator === ">" ||
     operator === ">=" ||

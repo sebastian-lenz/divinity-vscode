@@ -359,7 +359,7 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
       return result;
     }
 
-    result = castType(result, annotatedType);
+    result = castType(result, annotatedType, false, true);
     if (result === ParameterType.Invalid) {
       result = annotatedType;
 

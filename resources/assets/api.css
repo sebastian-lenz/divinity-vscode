@@ -124,6 +124,7 @@ tbody > tr:nth-child(odd) {
 }
 
 .divinityLink {
+  text-decoration: none;
   cursor: pointer;
 }
 

@@ -69,6 +69,11 @@ function transformLinks(string: string): string {
   return string.replace(/href="([^"]*)"/g, transformLink);
 }
 
+export interface WikiExternalLink {
+  caption: string;
+  url: string;
+}
+
 export interface WikiData {
   links: Array<{
     "*": string;
@@ -114,13 +119,23 @@ export default class WikiParser {
   appendLinkedSymbols(
     project: Project,
     symbols: Array<SymbolData>
-  ): Array<SymbolData> {
+  ): Array<WikiExternalLink> {
     const { data } = this;
-    if (!data) return symbols;
+    const links: Array<WikiExternalLink> = [];
+    if (!data) return links;
 
     for (const link of data.links) {
-      const name = symbolFromPath(link["*"]);
-      if (!name) continue;
+      const linkValue = link["*"];
+      const name = symbolFromPath(linkValue);
+
+      if (!name) {
+        const splitAt = linkValue.lastIndexOf("/");
+        links.push({
+          caption: splitAt === -1 ? linkValue : linkValue.substr(splitAt + 1),
+          url: `${wikiUrl}/${linkValue}`
+        });
+        continue;
+      }
 
       const compare = name.toLowerCase();
       if (symbols.some(({ name }) => name.toLowerCase() === compare)) {
@@ -136,7 +151,7 @@ export default class WikiParser {
       }
     }
 
-    return symbols;
+    return links;
   }
 
   getApiContent(): string {

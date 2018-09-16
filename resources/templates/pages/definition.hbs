@@ -82,4 +82,18 @@
 {{/if}}
 
 <h2 class="divinitySection">See also</h2>
+{{#if wiki}}
+  {{#if wiki.externalLinks}}
+    <p><strong>External links</strong></p>
+    <div class="divinityCompactList">
+      {{#each wiki.externalLinks}}
+      <div class="divinityCompactList--item">
+        <a class="divinityLink" href="{{ url }}">
+          <span class="divinitySymbolName">{{ caption }}</span>
+        </a>
+      </div>
+      {{/each}}
+    </div>  
+  {{/if}}
+{{/if}}
 {{> definitions}}

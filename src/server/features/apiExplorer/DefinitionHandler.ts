@@ -46,11 +46,12 @@ export default class DefinitionHandler extends Handler<Parameters> {
     }
 
     const project = await this.feature.getProject();
-    parser.appendLinkedSymbols(project, symbols);
+    const externalLinks = parser.appendLinkedSymbols(project, symbols);
 
     return {
       content: parser.getApiContent(),
-      editLink
+      editLink,
+      externalLinks
     };
   }
 

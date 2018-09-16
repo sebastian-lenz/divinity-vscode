@@ -148,5 +148,6 @@ export const enum DiagnosticCode {
   InvalidGoalSection = "E1008",
   InvalidVariableName = "E1009",
   VariableNotAllowed = "E1010",
-  InvalidGuidInString = "W1010"
+  InvalidGuidInString = "W1010",
+  InvalidEnumValue = "E1011"
 }

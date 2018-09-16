@@ -1,4 +1,5 @@
 import eachNodeRecursive from "../../../parsers/story/utils/eachNodeRecursive";
+import EnumerationAnalyzer from "./Enumeration";
 import GuidInStringAnalyzer from "./GuidInString";
 import ParameterAnalyzer from "./Parameter";
 import ParentTargetEdgeAnalyzer from "./ParentTargetEdge";
@@ -36,7 +37,8 @@ export default class Analyzers {
       new SymbolTypesAnalyzer(this),
       new SymbolLocationsAnalyzer(this),
       new ParameterAnalyzer(this),
-      new GuidInStringAnalyzer(this)
+      new GuidInStringAnalyzer(this),
+      new EnumerationAnalyzer(this)
     ];
   }
 

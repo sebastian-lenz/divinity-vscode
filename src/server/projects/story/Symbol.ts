@@ -121,7 +121,7 @@ export default class Symbol {
       const name = argument.name.toLowerCase();
       const variable: Variable = {
         displayName: argument.name,
-        enumeration: this.parameters[index].type,
+        enumeration: this.parameters[index].enumeration,
         fromIndex: index,
         fromSymbol: this,
         name,

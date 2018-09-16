@@ -82,7 +82,14 @@ function castType(
 ): ParameterType {
   if (from === to) return from;
   if (isIntegerType(from) && isIntegerType(to)) return to;
-  if (allowGuidCast && isGuidType(from) && isGuidType(to)) return to;
+
+  if (allowGuidCast) {
+    if (isGuidType(from) && isGuidType(to)) return to;
+  } else {
+    if (to === ParameterType.Guid && isGuidType(from)) return to;
+    if (isGuidType(to) && from === ParameterType.Guid) return to;
+  }
+
   if (allowNumericCast && isNumericType(from) && isNumericType(to)) return to;
 
   return ParameterType.Invalid;

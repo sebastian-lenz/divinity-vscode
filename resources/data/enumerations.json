@@ -2279,7 +2279,7 @@
       { "value": "LifeTime" }
     ],
     "parameters": [
-      { "name": "CharacterDie", "index": 1 },
+      { "name": "CharacterDie", "index": 2 },
       { "name": "CharacterDieImmediate", "index": 2 }
     ]
   },

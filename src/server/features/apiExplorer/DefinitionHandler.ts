@@ -81,6 +81,9 @@ export default class DefinitionHandler extends Handler<Parameters> {
         enumerations.push({
           description: parameter.enumeration.description,
           fixed: parameter.enumeration.fixed,
+          useDetails:
+            !parameter.enumeration.fixed ||
+            parameter.enumeration.values.length > 10,
           name: parameter.name,
           values: parameter.enumeration.getSortedValues()
         });

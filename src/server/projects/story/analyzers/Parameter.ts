@@ -77,11 +77,12 @@ export function isNumericOperator(operator: string) {
 function castType(
   from: ParameterType,
   to: ParameterType,
-  allowNumericCast?: boolean
+  allowNumericCast?: boolean,
+  allowGuidCast?: boolean
 ): ParameterType {
   if (from === to) return from;
-  if (isGuidType(from) && isGuidType(to)) return to;
   if (isIntegerType(from) && isIntegerType(to)) return to;
+  if (allowGuidCast && isGuidType(from) && isGuidType(to)) return to;
   if (allowNumericCast && isNumericType(from) && isNumericType(to)) return to;
 
   return ParameterType.Invalid;
@@ -172,7 +173,7 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
       return;
     }
 
-    if (castType(leftType, rightType, true) === ParameterType.Invalid) {
+    if (castType(leftType, rightType, true, true) === ParameterType.Invalid) {
       return this.addDiagnostic(
         operator,
         msgComparisonTypeMismatch({ leftType, rightType })

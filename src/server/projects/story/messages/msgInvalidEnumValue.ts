@@ -16,7 +16,15 @@ export default function msgInvalidEnumValue({
   enumeration,
   value
 }: Params): DiagnosticMessage {
-  let hint: string = "";
+  let message: string;
+  if (enumeration.name === "boolean") {
+    message = `Boolean parameters only accept the values "0" and "1".`;
+  } else {
+    message = `The value "${value}" is not a valid member of the enumeration "${
+      enumeration.name
+    }".`;
+  }
+
   if (typeof value === "string") {
     const similiar: Array<string> = [];
     const searchValue = value.toLowerCase();
@@ -32,7 +40,7 @@ export default function msgInvalidEnumValue({
       similiar.sort();
       const orSimiliar = similiar.length > 1 ? similiar.pop() : undefined;
 
-      hint = ` Did you mean ${similiar.join(", ")}${
+      message += ` Did you mean ${similiar.join(", ")}${
         orSimiliar ? ` or ${orSimiliar}` : ""
       }?`;
     }
@@ -40,9 +48,7 @@ export default function msgInvalidEnumValue({
 
   return {
     code: DiagnosticCode.InvalidEnumValue,
-    message: `The value "${value}" is not a valid member of the enumeration "${
-      enumeration.name
-    }".${hint}`,
+    message,
     severity: DiagnosticSeverity.Error
   };
 }

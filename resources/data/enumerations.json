@@ -2326,6 +2326,7 @@
     "name": "ability",
     "type": "string",
     "description": "The name of an ability.",
+    "fixed": true,
     "values": [
       { "value": "None" },
       { "value": "WarriorLore" },

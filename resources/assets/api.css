@@ -43,6 +43,35 @@ summary {
   cursor: pointer;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+th {
+  border-bottom: 1px solid var(--vscode-panel-border);
+  text-align: left;
+}
+
+td,
+th {
+  box-sizing: content-box;
+  padding: 5px;
+}
+
+tbody > tr:nth-child(odd) {
+  background: var(--vscode-editorSuggestWidget-background);
+}
+
+.divinityEnumTable {
+  table-layout: fixed;
+}
+
+.divinityEnumTable td {
+  width: 50%;
+}
+
 .divinitySection {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--vscode-panel-border);

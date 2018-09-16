@@ -2,6 +2,7 @@ import * as Queue from "promise-queue";
 import { join, normalize } from "path";
 
 import Analyzers from "./analyzers";
+import Enumerations from "./Enumerations";
 import FileResource from "./resources/FileResource";
 import FileWatcher from "../FileWatcher";
 import Goal from "./Goal";
@@ -18,6 +19,7 @@ export default class Story {
   isInitializing: boolean = true;
 
   readonly analyzers: Analyzers = new Analyzers(this);
+  readonly enumerations: Enumerations = new Enumerations();
   readonly orphanQueries: OrphanQueries = new OrphanQueries(this);
   readonly project: Project;
   readonly symbols: Symbols = new Symbols(this);

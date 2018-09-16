@@ -18,6 +18,7 @@ import { Feature } from "..";
 import { NodeType, AnyNode } from "../../parsers/story/models/nodes";
 import { SymbolType } from "../../projects/story/models/symbol";
 import printParameterType from "../../projects/story/utils/printParameterType";
+import isCallerNode from "../../parsers/story/utils/isCallerNode";
 
 const SYMBOL_DATA = "divinity.symbol:";
 
@@ -63,6 +64,11 @@ function fromRuleType(ruleType: string, type: CompletionType): CompletionType {
   return type;
 }
 
+export interface ParameterInfo {
+  index: number;
+  name: string;
+}
+
 export default class CompletionFeature extends Feature {
   constructor(server: Server) {
     super(server);
@@ -85,7 +91,8 @@ export default class CompletionFeature extends Feature {
   getCapabilities(): Partial<ServerCapabilities> {
     return {
       completionProvider: {
-        resolveProvider: true
+        resolveProvider: true,
+        triggerCharacters: ['"']
       }
     };
   }
@@ -127,13 +134,10 @@ export default class CompletionFeature extends Feature {
 
   getParameterCompletions(
     resource: Resource,
-    nodes?: Array<AnyNode>
+    nodes?: Array<AnyNode>,
+    parameter?: ParameterInfo
   ): Array<CompletionItem> {
-    const { instances } = resource.story.project.levels;
-    const result: Array<CompletionItem> = instances.map(instance => ({
-      kind: CompletionItemKind.Reference,
-      label: `${instance.name}_${instance.guid}`
-    }));
+    const result = this.getSpecificParameterCompletions(resource, parameter);
 
     const variablesAt = this.getVariablesAt(nodes);
     if (variablesAt) {
@@ -145,6 +149,31 @@ export default class CompletionFeature extends Feature {
         });
       }
     }
+
+    return result;
+  }
+
+  getSpecificParameterCompletions(
+    resource: Resource,
+    parameter?: ParameterInfo
+  ): Array<CompletionItem> {
+    const result: Array<CompletionItem> = [];
+    if (!parameter) return result;
+
+    const { index, name } = parameter;
+    const { symbols } = resource.story;
+    const symbol = symbols.findSymbolWithMostParameters(name);
+    if (!symbol) return result;
+
+    const info = symbol.parameters[index];
+    if (!info) return result;
+
+    if (info.enumeration) {
+      info.enumeration.collectCompletions(result);
+    }
+
+    const { levels } = resource.story.project;
+    levels.collectCompletions(result, info.type);
 
     return result;
   }
@@ -222,10 +251,12 @@ export default class CompletionFeature extends Feature {
 
     const document = resource.getDocument();
     let type: CompletionType = CompletionType.Global;
+    let parameter: ParameterInfo | undefined;
 
     if (document && nodes) {
       const offset = document.offsetAt(params.position);
-      for (const node of nodes) {
+      for (let index = 0; index < nodes.length; index++) {
+        const node = nodes[index];
         if (node.type === NodeType.TypeAnnotation) {
           type = CompletionType.Type;
           break;
@@ -239,6 +270,11 @@ export default class CompletionFeature extends Feature {
             start: unpackPosition(node.identifier.endPosition),
             end: params.position
           });
+
+          parameter = {
+            index: chunk.replace(/"[^"]*"/g, "_").split(",").length - 1,
+            name: node.identifier.name
+          };
 
           type = /\([^\)]*$/.test(chunk.substr(1))
             ? CompletionType.Type
@@ -291,7 +327,7 @@ export default class CompletionFeature extends Feature {
       case CompletionType.Events:
         return this.getEventCompletions(resource);
       case CompletionType.Parameter:
-        return this.getParameterCompletions(resource, nodes);
+        return this.getParameterCompletions(resource, nodes, parameter);
       case CompletionType.Procedures:
         return this.getProceduresCompletions(resource);
       case CompletionType.Queries:

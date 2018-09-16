@@ -1,11 +1,10 @@
+import { CompletionItem, CompletionItemKind } from "vscode-languageserver";
+
 import LSFParser from "../../parsers/lsf/Parser";
 import Project from "../Project";
 import FileWatcher from "../../projects/FileWatcher";
 import { readFile } from "../../../shared/fs";
-
-const allowedTypes = ["character", "item", "leveltemplate", "trigger"];
-
-export type InstanceType = "character" | "item" | "leveltemplate" | "trigger";
+import { ParameterType } from "../story/models/parameter";
 
 export interface FileInfo {
   path: string;
@@ -15,7 +14,7 @@ export interface FileInfo {
 
 export interface InstanceInfo extends FileInfo {
   name: string;
-  type: InstanceType;
+  type: ParameterType;
 }
 
 export const enum LevelsInitState {
@@ -36,6 +35,19 @@ export default class Levels {
 
   constructor(project: Project) {
     this.project = project;
+  }
+
+  collectCompletions(result: Array<CompletionItem>, type?: ParameterType) {
+    for (const instance of this.instances) {
+      if (type && type !== ParameterType.Guid && instance.type !== type) {
+        continue;
+      }
+
+      result.push({
+        kind: CompletionItemKind.Reference,
+        label: `${instance.name}_${instance.guid}`
+      });
+    }
   }
 
   dispose() {
@@ -128,20 +140,18 @@ export default class Levels {
 
     if (node) {
       const name = node.getStringAttribute("Name");
-      const type = node.getStringAttribute("Type");
+      const type = this.toParameterType(node.getStringAttribute("Type"));
 
-      if (name && !name.startsWith("S_")) {
+      if (!name || !type || (name && !name.startsWith("S_"))) {
         return null;
       }
 
-      if (name && type && allowedTypes.indexOf(type) !== -1) {
-        result = {
-          ...info,
-          guid: info.guid.toLowerCase(),
-          name,
-          type: type as InstanceType
-        };
-      }
+      result = {
+        ...info,
+        guid: info.guid.toLowerCase(),
+        name,
+        type
+      };
     }
 
     return result;
@@ -163,4 +173,25 @@ export default class Levels {
       this.pending = this.pending.filter(info => info.guid !== guid);
     }
   };
+
+  toParameterType(value: string | null): ParameterType | null {
+    if (!value) {
+      return null;
+    }
+
+    switch (value.toLowerCase()) {
+      case "trigger":
+        return ParameterType.TriggerGuid;
+      case "character":
+        return ParameterType.CharacterGuid;
+      case "item":
+        return ParameterType.ItemGuid;
+      case "spline":
+        return ParameterType.SplineGuid;
+      case "leveltemplate":
+        return ParameterType.LevelTemplateGuid;
+    }
+
+    return null;
+  }
 }

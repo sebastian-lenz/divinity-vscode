@@ -1,3 +1,4 @@
+import Enumeration from "../Enumeration";
 import Symbol from "../Symbol";
 import { ParameterFlow } from "../../../parsers/story/models/nodes";
 
@@ -17,6 +18,7 @@ export enum ParameterType {
 }
 
 export interface Parameter {
+  enumeration?: Enumeration;
   flow: ParameterFlow | null;
   fromIndex: number | null;
   fromSymbol: Symbol | null;

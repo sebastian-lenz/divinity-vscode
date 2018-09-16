@@ -9,11 +9,13 @@ import SymbolTypesAnalyzer from "./SymbolTypes";
 import SyntaxErrorAnalyzer from "./SyntaxError";
 import { AnyAnalyzer, AnalyzerContext, SyncAnalyzer } from "./Analyzer";
 import { Diagnostic } from "../../../parsers/story/models/diagnostics";
+
 import {
   StoryGoalNode,
   AnyNode,
   NodeType
 } from "../../../parsers/story/models/nodes";
+
 import {
   isInScope,
   Scope,

@@ -9,7 +9,8 @@ export default function didParametersChange(
     const toParameter = to[index];
     return (
       fromParameter.type === toParameter.type &&
-      fromParameter.flow === toParameter.flow
+      fromParameter.flow === toParameter.flow &&
+      fromParameter.enumeration === toParameter.enumeration
     );
   });
 }

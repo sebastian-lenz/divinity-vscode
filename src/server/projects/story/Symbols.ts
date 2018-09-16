@@ -24,7 +24,7 @@ export default class Symbols {
   addSystemSymbol(definition: DefinitionNode) {
     let symbol = this.findSymbolForSignature(definition.signature);
     if (!symbol) {
-      symbol = Symbol.fromDefinition(definition);
+      symbol = Symbol.fromDefinition(this, definition);
       this.symbols.push(symbol);
     } else {
       symbol.toSystemSymbol(definition);
@@ -59,6 +59,20 @@ export default class Symbols {
           symbol.searchName === name && symbol.numParameters === numParameters
       ) || null
     );
+  }
+
+  findSymbolWithMostParameters(name: string): Symbol | null {
+    let result: Symbol | null = null;
+    for (const symbol of this.symbols) {
+      if (
+        symbol.name === name &&
+        (!result || symbol.numParameters > result.numParameters)
+      ) {
+        result = symbol;
+      }
+    }
+
+    return result;
   }
 
   findSymbols(name: string): Array<Symbol> {
@@ -102,11 +116,12 @@ export default class Symbols {
 
   updateGoal(goal: Goal, rootNode: HeaderGoalNode | StoryGoalNode) {
     this.removeByGoal(goal);
+    this.story.enumerations.removeByGoal(goal);
 
     for (const { node, type, variables } of eachCaller(rootNode)) {
       let symbol = this.findSymbolForSignature(node.signature);
       if (!symbol) {
-        symbol = Symbol.fromCaller(node);
+        symbol = Symbol.fromCaller(this, node);
         this.symbols.push(symbol);
       }
 

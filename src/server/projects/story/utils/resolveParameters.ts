@@ -1,4 +1,5 @@
 import Symbol, { SymbolDefinition } from "../Symbol";
+import { EnumerationMap } from "../Enumerations";
 import { Parameter, ParameterType } from "../models/parameter";
 
 export const enum ResolvePrameterResult {
@@ -15,6 +16,7 @@ export default function resolveParameters(
   const { isPartial, parameters } = definition;
   const { parameterNames: names } = symbol;
   const resolved: Array<Parameter> = [];
+  const enumMap = symbol.getEnumMap();
 
   if (isPartial) {
     return ResolvePrameterResult.Partial;
@@ -23,9 +25,18 @@ export default function resolveParameters(
   for (let index = 0; index < parameters.length; index++) {
     const { flow, fromIndex, fromSymbol, type } = parameters[index];
     const name = names[index].name;
+    const enumeration = enumMap[index];
 
     if (type !== ParameterType.Unknown) {
-      resolved.push({ flow, fromIndex: null, fromSymbol: null, name, type });
+      resolved.push({
+        enumeration,
+        flow,
+        fromIndex: null,
+        fromSymbol: null,
+        name,
+        type
+      });
+
       continue;
     }
 
@@ -55,7 +66,7 @@ export default function resolveParameters(
         }
       }
 
-      resolved.push({ flow, fromIndex, fromSymbol, name, type });
+      resolved.push({ enumeration, flow, fromIndex, fromSymbol, name, type });
       continue;
     }
 

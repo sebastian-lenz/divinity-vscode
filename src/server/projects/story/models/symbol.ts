@@ -2,6 +2,7 @@ import Goal from "../Goal";
 import Symbol from "../Symbol";
 import { AnyNode } from "../../../parsers/story/models/nodes";
 import { ParameterType } from "./parameter";
+import Enumeration from "../Enumeration";
 
 export interface SymbolParameterDoc {
   description?: string;
@@ -28,6 +29,7 @@ export interface SymbolLocation {
 
 export interface Variable {
   displayName: string;
+  enumeration?: Enumeration;
   fromIndex: number;
   fromSymbol: Symbol;
   name: string;

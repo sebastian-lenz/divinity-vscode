@@ -22,7 +22,6 @@ export function formatError(message: string, err: any): string {
 }
 
 export function cancelValue<E>() {
-  console.log("cancelled");
   return new ResponseError<E>(ErrorCodes.RequestCancelled, "Request cancelled");
 }
 

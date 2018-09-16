@@ -74,6 +74,18 @@ export default class DefinitionHandler extends Handler<Parameters> {
       }))
     }));
 
+    const enumerations = [];
+    for (const parameter of signature.parameters) {
+      if (parameter.enumeration) {
+        enumerations.push({
+          description: parameter.enumeration.description,
+          fixed: parameter.enumeration.fixed,
+          name: parameter.name,
+          values: parameter.enumeration.getSortedValues()
+        });
+      }
+    }
+
     const allSymbols = await this.getSymbols(category.qualifiedName);
     const symbols = allSymbols.filter(symbol => symbol.name !== signature.name);
     const wiki = await this.loadWiki(signature.name, symbols);
@@ -91,6 +103,7 @@ export default class DefinitionHandler extends Handler<Parameters> {
       template: "definition",
       context: {
         category,
+        enumerations,
         signatures: plainSignatures,
         symbols: groupSymbols(symbols),
         title: `${ucfirst(type)} ${signature.name}`,

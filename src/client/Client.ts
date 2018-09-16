@@ -11,7 +11,11 @@ import {
 
 import features, { Feature } from "./features";
 import LSLib, { LSLibFile } from "./utils/LSLib";
-import { readyEvent, ProjectInfo } from "../shared/notifications";
+import {
+  readyEvent,
+  ProjectInfo,
+  showErrorEvent
+} from "../shared/notifications";
 import TaskProviderFeature from "./features/taskProvider";
 
 export default class Client extends EventEmitter {
@@ -73,6 +77,10 @@ export default class Client extends EventEmitter {
 
     client.start();
     client.onReady().then(() => {
+      client.onNotification(showErrorEvent, message => {
+        window.showErrorMessage(message);
+      });
+
       client.onNotification(readyEvent, () => {
         if (this.isReady) return;
         this.isReady = true;

@@ -30,6 +30,44 @@
   {{#if wiki.content}}
     {{{ wiki.content }}}
   {{/if}}
+{{/if}}
+
+{{#if enumerations}}
+  <h2>Enumerations</h2>
+  <ul>
+  {{#each enumerations}}
+    <li>
+      <p>
+        <strong>{{name}}</strong>
+        {{~#if fixed}}{{else}} (dynamic){{description}}{{/if}}
+        {{~#if description}}: {{description}}{{/if}}
+      </p>
+      {{#if values}}
+        <table class="divinityEnumTable">
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each values}}
+              <tr>
+                <td>{{value}}</td>
+                <td>{{label}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <p><i>No values found for this enumeration.</i></p>
+      {{/if}}
+    </li>
+  {{/each}} 
+  </ul>
+{{/if}}
+
+{{#if wiki}}
   {{#if wiki.editLink}}
     {{#if wiki.notFound}}
       <p><a href="{{ wiki.editLink }}">Create this page</a></p>

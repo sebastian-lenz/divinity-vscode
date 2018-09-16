@@ -16,11 +16,13 @@ export default function toParameters(
 ) {
   const positions = signature.parameters;
   const parameters: Array<Parameter> = [];
+  const enumMap = symbol.getEnumMap();
   let isInferred: boolean = false;
   let isPartial: boolean = false;
 
   for (let index = 0; index < positions.length; index++) {
     const position = positions[index];
+    const enumeration = enumMap[index];
     const { argument, flow } = position;
 
     let type = getExplicitParameterType(position);
@@ -45,6 +47,7 @@ export default function toParameters(
       if (variable && variable.fromSymbol !== symbol) {
         isInferred = true;
         parameters.push({
+          enumeration,
           flow,
           fromIndex: variable.fromIndex,
           fromSymbol: variable.fromSymbol,
@@ -61,6 +64,7 @@ export default function toParameters(
     }
 
     parameters.push({
+      enumeration,
       flow,
       fromIndex: null,
       fromSymbol: null,

@@ -27,6 +27,8 @@ import {
   DefinitionNode,
   ParameterFlow
 } from "../../parsers/story/models/nodes";
+import Symbols from "./Symbols";
+import { EnumerationMap } from "./Enumerations";
 
 function compareDefinition(left: SymbolDefinition, right: SymbolDefinition) {
   if (left.goal.weight === right.goal.weight) {
@@ -53,17 +55,21 @@ export default class Symbol {
   documentation: SymbolDoc | null = null;
   isDead: boolean = false;
   isSystem: boolean = false;
-  name: string;
   needsUpdate: boolean = false;
-  numParameters: number;
   parameters: Array<Parameter>;
   parameterNames: Array<ScoredParameterName>;
   resolvedDefinition: SymbolDefinition | null = null;
-  searchName: string;
   type: SymbolType = SymbolType.Unknown;
-  usages: Array<Goal> = [];
 
-  constructor(name: string, numParameters: number) {
+  readonly name: string;
+  readonly numParameters: number;
+  readonly searchName: string;
+  readonly symbols: Symbols;
+  readonly usages: Array<Goal> = [];
+
+  constructor(symbols: Symbols, name: string, numParameters: number) {
+    this.symbols = symbols;
+
     const parameters: Array<Parameter> = [];
     const parameterNames: Array<ScoredParameterName> = [];
 
@@ -113,8 +119,9 @@ export default class Symbol {
 
       const annotatedType = getAnnotatedType(parameter.valueType);
       const name = argument.name.toLowerCase();
-      const variable = {
+      const variable: Variable = {
         displayName: argument.name,
+        enumeration: this.parameters[index].type,
         fromIndex: index,
         fromSymbol: this,
         name,
@@ -185,6 +192,8 @@ export default class Symbol {
     const { parameters } = node.signature;
     for (let index = 0; index < parameters.length; index++) {
       const { argument } = parameters[index];
+      const parameter = this.parameters[index];
+
       if (
         argument.type === NodeType.Identifier &&
         argument.identifierType === IdentifierType.Variable
@@ -194,6 +203,14 @@ export default class Symbol {
           parameterNames[index].score = score;
           parameterNames[index].name = argument.name;
         }
+      }
+
+      if (
+        parameter.enumeration &&
+        (argument.type === NodeType.StringLiteral ||
+          argument.type === NodeType.IntegerLiteral)
+      ) {
+        parameter.enumeration.addValue(goal, argument);
       }
     }
 
@@ -212,6 +229,10 @@ export default class Symbol {
 
       this.needsUpdate = true;
     }
+  }
+
+  getEnumMap(): EnumerationMap {
+    return this.symbols.story.enumerations.findSymbolEnums(this.searchName);
   }
 
   hasCompleteDefinition(target: Goal): boolean {
@@ -315,8 +336,9 @@ export default class Symbol {
       return;
     }
 
-    definitions.sort(compareDefinition);
     let deadCounter = 0;
+    definitions.sort(compareDefinition);
+
     this.type = SymbolType.Unknown;
 
     for (const definition of definitions) {
@@ -358,9 +380,10 @@ export default class Symbol {
     this.resetParameters();
   }
 
-  static fromCaller(caller: CallerNode): Symbol {
+  static fromCaller(symbols: Symbols, caller: CallerNode): Symbol {
     const { signature } = caller;
     const symbol = new Symbol(
+      symbols,
       signature.identifier.name,
       signature.parameters.length
     );
@@ -368,9 +391,10 @@ export default class Symbol {
     return symbol;
   }
 
-  static fromDefinition(definition: DefinitionNode): Symbol {
+  static fromDefinition(symbols: Symbols, definition: DefinitionNode): Symbol {
     const { signature } = definition;
     const symbol = new Symbol(
+      symbols,
       signature.identifier.name,
       signature.parameters.length
     );

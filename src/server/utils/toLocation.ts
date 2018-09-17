@@ -1,4 +1,5 @@
-import { Location, TextDocument } from "vscode-languageserver/lib/main";
+import { Location, TextDocument } from "vscode-languageserver";
+
 import { TokenRange } from "../parsers/story/Lexer";
 import unpackRange from "../parsers/story/utils/unpackRange";
 

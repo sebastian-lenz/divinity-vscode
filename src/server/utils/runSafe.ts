@@ -7,7 +7,7 @@ import {
   CancellationToken,
   ResponseError,
   ErrorCodes
-} from "vscode-languageserver/lib/main";
+} from "vscode-languageserver";
 
 export function formatError(message: string, err: any): string {
   if (err instanceof Error) {

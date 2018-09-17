@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { LanguageClient } from "vscode-languageclient/lib/main";
+import { LanguageClient } from "vscode-languageclient";
 import { Progress, ProgressLocation, window } from "vscode";
 
 import Feature from "../Feature";

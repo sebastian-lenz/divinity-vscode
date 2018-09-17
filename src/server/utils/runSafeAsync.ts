@@ -3,10 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CancellationToken,
-  ResponseError
-} from "vscode-languageserver/lib/main";
+import { CancellationToken, ResponseError } from "vscode-languageserver";
 
 import { cancelValue, formatError } from "./runSafe";
 

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "importHelpers": true,
     "lib": ["es6"],
     "module": "commonjs",
     "outDir": "lib",

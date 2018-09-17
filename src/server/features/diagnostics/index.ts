@@ -1,5 +1,4 @@
-import { Connection } from "vscode-languageserver/lib/main";
-import { TextDocumentChangeEvent } from "vscode-languageserver/lib/main";
+import { Connection, TextDocumentChangeEvent } from "vscode-languageserver";
 
 import Feature from "../Feature";
 import Resource from "../../projects/story/resources/Resource";

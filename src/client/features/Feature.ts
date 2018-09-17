@@ -1,4 +1,4 @@
-import { LanguageClient } from "vscode-languageclient/lib/main";
+import { LanguageClient } from "vscode-languageclient";
 
 import Client from "../Client";
 

@@ -10,13 +10,13 @@ import {
 } from "vscode-languageclient";
 
 import features, { Feature } from "./features";
-import LSLib, { LSLibFile } from "./utils/LSLib";
+import LSLib from "./utils/LSLib";
+import TaskProviderFeature from "./features/taskProvider";
 import {
   readyEvent,
   ProjectInfo,
   showErrorEvent
 } from "../shared/notifications";
-import TaskProviderFeature from "./features/taskProvider";
 
 export default class Client extends EventEmitter {
   clientId = "osiris-language-server";

@@ -1,3 +1,9 @@
+# Version 1.0.8
+
+- Hotfix: Prevent a dead lock when editing goals.
+- Hide "Show API explorer" in files that are no goals.
+- Allow empty values on enumeration parameters.
+
 # Version 1.0.7
 
 - Hotfix: Prevent a dead lock when loading projects.

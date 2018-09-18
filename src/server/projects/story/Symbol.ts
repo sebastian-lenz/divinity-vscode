@@ -1,13 +1,18 @@
 import didParametersChange from "./utils/didParametersChange";
 import getAnnotatedType from "./utils/getAnnotatedType";
 import getCallerSymbolType from "./utils/getCallerSymbolType";
+import getDefinitionSort from "./utils/getDefinitionSort";
 import getDefinitionSymbolType from "./utils/getDefinitionSymbolType";
 import getParameterNameScore from "./utils/getParameterNameScore";
 import Goal from "./Goal";
+import isDefinitionListEqual from "./utils/isDefinitionListEqual";
+import isGoalListEqual from "./utils/isGoalListEqual";
 import parseDocComments from "./utils/parseDocComment";
+import Symbols from "./Symbols";
 import toParameters from "./utils/toParameters";
 import { CallerNode } from "../../parsers/story/utils/isCallerNode";
 import { EachCallerType } from "../../parsers/story/utils/eachCaller";
+import { EnumerationMap } from "./Enumerations";
 import { SymbolType, SymbolDoc, Variable } from "./models/symbol";
 import { TokenRange } from "../../parsers/story/Lexer";
 
@@ -27,16 +32,6 @@ import {
   DefinitionNode,
   ParameterFlow
 } from "../../parsers/story/models/nodes";
-import Symbols from "./Symbols";
-import { EnumerationMap } from "./Enumerations";
-
-function compareDefinition(left: SymbolDefinition, right: SymbolDefinition) {
-  if (left.goal.weight === right.goal.weight) {
-    return left.startOffset - right.startOffset;
-  }
-
-  return left.goal.weight - right.goal.weight;
-}
 
 export interface SymbolDefinition extends TokenRange {
   comment: string | null;
@@ -45,6 +40,13 @@ export interface SymbolDefinition extends TokenRange {
   isPartial: boolean;
   parameters: Array<Parameter>;
   type: SymbolType;
+}
+
+export interface SymbolState {
+  dbReads?: Array<Goal>;
+  dbWrites?: Array<Goal>;
+  definitions?: Array<SymbolDefinition>;
+  symbol: Symbol;
 }
 
 export default class Symbol {
@@ -147,7 +149,6 @@ export default class Symbol {
       (!dbReads || dbReads.indexOf(goal) === -1)
     ) {
       if (!dbReads) {
-        this.invalidateUsage();
         dbReads = this.dbReads = [];
       }
 
@@ -160,7 +161,6 @@ export default class Symbol {
       (!dbWrites || dbWrites.indexOf(goal) === -1)
     ) {
       if (!dbWrites) {
-        this.invalidateUsage();
         dbWrites = this.dbWrites = [];
       }
 
@@ -242,6 +242,19 @@ export default class Symbol {
     );
   }
 
+  invalidate(state: SymbolState) {
+    if (
+      !isGoalListEqual(this.dbReads, state.dbReads) ||
+      !isGoalListEqual(this.dbWrites, state.dbWrites)
+    ) {
+      this.invalidateUsage();
+    }
+
+    if (!isDefinitionListEqual(this.definitions, state.definitions)) {
+      this.needsUpdate = true;
+    }
+  }
+
   invalidateUsage() {
     for (const usage of this.usages) {
       usage.resource.invalidate();
@@ -258,8 +271,9 @@ export default class Symbol {
     }
   }
 
-  removeGoal(goal: Goal) {
-    const { usages, dbReads, dbWrites } = this;
+  removeGoal(goal: Goal): SymbolState | null {
+    const { definitions, usages, dbReads, dbWrites } = this;
+    const result: SymbolState = { symbol: this };
     let index = usages.indexOf(goal);
     if (index !== -1) {
       usages.splice(index, 1);
@@ -268,6 +282,7 @@ export default class Symbol {
     if (dbWrites) {
       index = dbWrites.indexOf(goal);
       if (index !== -1) {
+        result.dbWrites = dbWrites.slice();
         dbWrites.splice(index, 1);
       }
 
@@ -279,6 +294,7 @@ export default class Symbol {
     if (dbReads) {
       index = dbReads.indexOf(goal);
       if (index !== -1) {
+        result.dbReads = dbReads.slice();
         dbReads.splice(index, 1);
       }
 
@@ -288,12 +304,15 @@ export default class Symbol {
     }
 
     if (this.isDefinedBy(goal)) {
-      this.definitions = this.definitions.filter(
+      result.definitions = definitions;
+      this.definitions = definitions.filter(
         definition => definition.goal !== goal
       );
-
-      this.needsUpdate = true;
     }
+
+    return result.dbReads || result.dbWrites || result.definitions
+      ? result
+      : null;
   }
 
   resetParameters() {
@@ -337,7 +356,7 @@ export default class Symbol {
     }
 
     let deadCounter = 0;
-    definitions.sort(compareDefinition);
+    definitions.sort(getDefinitionSort);
 
     this.type = SymbolType.Unknown;
 

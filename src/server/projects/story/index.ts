@@ -163,7 +163,7 @@ export default class Story {
 
   removeGoal(goal: Goal, isOverride?: boolean) {
     this.goals = this.goals.filter(existingGoal => existingGoal !== goal);
-    this.symbols.removeByGoal(goal);
+    this.symbols.removeAndInvalidateByGoal(goal);
 
     if (!isOverride && goal.overrides) {
       this.goals.push(goal.overrides);

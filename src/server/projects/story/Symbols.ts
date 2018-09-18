@@ -3,7 +3,7 @@ import { get as levenshtein } from "fast-levenshtein";
 import eachCaller from "../../parsers/story/utils/eachCaller";
 import Goal from "./Goal";
 import Story from "./index";
-import Symbol from "./Symbol";
+import Symbol, { SymbolState } from "./Symbol";
 import { SymbolDoc } from "./models/symbol";
 
 import {
@@ -96,6 +96,12 @@ export default class Symbols {
     return await docProvider.getDocumentation(symbol.name);
   }
 
+  invalidate(states: Array<SymbolState>) {
+    for (const state of states) {
+      state.symbol.invalidate(state);
+    }
+  }
+
   async loadMetaData() {
     const { docProvider } = this.story.project.projects;
     const categories = await docProvider.getSymbolCategories();
@@ -115,8 +121,8 @@ export default class Symbols {
   }
 
   updateGoal(goal: Goal, rootNode: HeaderGoalNode | StoryGoalNode) {
-    this.removeByGoal(goal);
     this.story.enumerations.removeByGoal(goal);
+    const states = this.removeByGoal(goal);
 
     for (const { node, type, variables } of eachCaller(rootNode)) {
       let symbol = this.findSymbolForSignature(node.signature);
@@ -132,13 +138,26 @@ export default class Symbols {
 
       node.symbol = symbol;
     }
+
+    this.invalidate(states);
   }
 
-  removeByGoal(goal: Goal) {
+  removeAndInvalidateByGoal(goal: Goal) {
+    this.invalidate(this.removeByGoal(goal));
+  }
+
+  removeByGoal(goal: Goal): Array<SymbolState> {
     const { symbols } = this;
+    const result: Array<SymbolState> = [];
+
     for (const symbol of symbols) {
-      symbol.removeGoal(goal);
+      const state = symbol.removeGoal(goal);
+      if (state) {
+        result.push(state);
+      }
     }
+
+    return result;
   }
 
   update() {

@@ -8,11 +8,7 @@ import eachNode from "../../../parsers/story/utils/eachNode";
 import Projects from "../..";
 import Story from "..";
 import { AnyNode } from "../../../parsers/story/models/nodes";
-
-import {
-  Diagnostic,
-  DiagnosticType
-} from "../../../parsers/story/models/diagnostics";
+import { Diagnostic } from "../../../parsers/story/models/diagnostics";
 
 export interface ResourceOptions {
   story: Story;
@@ -119,7 +115,10 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   }
 
   invalidate() {
-    if (this.isHeaderGoal() || this.isInvalid || this.story.isInitializing) return;
+    if (this.isHeaderGoal() || this.isInvalid) {
+      return;
+    }
+
     this.isInvalid = true;
 
     setImmediate(() => {

@@ -43,8 +43,8 @@ export interface SymbolDefinition extends TokenRange {
 }
 
 export interface SymbolState {
-  dbReads?: Array<Goal>;
-  dbWrites?: Array<Goal>;
+  dbReads?: Array<Goal> | null;
+  dbWrites?: Array<Goal> | null;
   definitions?: Array<SymbolDefinition>;
   symbol: Symbol;
 }
@@ -273,7 +273,14 @@ export default class Symbol {
 
   removeGoal(goal: Goal): SymbolState | null {
     const { definitions, usages, dbReads, dbWrites } = this;
-    const result: SymbolState = { symbol: this };
+    const result: SymbolState = {
+      dbReads: this.dbReads,
+      dbWrites: this.dbWrites,
+      definitions: this.definitions,
+      symbol: this
+    };
+
+    let hasChanged = false;
     let index = usages.indexOf(goal);
     if (index !== -1) {
       usages.splice(index, 1);
@@ -284,6 +291,7 @@ export default class Symbol {
       if (index !== -1) {
         result.dbWrites = dbWrites.slice();
         dbWrites.splice(index, 1);
+        hasChanged = true;
       }
 
       if (dbWrites.length === 0) {
@@ -296,6 +304,7 @@ export default class Symbol {
       if (index !== -1) {
         result.dbReads = dbReads.slice();
         dbReads.splice(index, 1);
+        hasChanged = true;
       }
 
       if (dbReads.length === 0) {
@@ -304,15 +313,13 @@ export default class Symbol {
     }
 
     if (this.isDefinedBy(goal)) {
-      result.definitions = definitions;
+      hasChanged = true;
       this.definitions = definitions.filter(
         definition => definition.goal !== goal
       );
     }
 
-    return result.dbReads || result.dbWrites || result.definitions
-      ? result
-      : null;
+    return hasChanged ? result : null;
   }
 
   resetParameters() {

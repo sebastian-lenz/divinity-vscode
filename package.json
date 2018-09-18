@@ -190,7 +190,7 @@
         {
           "command": "divinity.showApiExplorer",
           "group": "navigation",
-          "when": "editorTextFocus"
+          "when": "editorTextFocus && editorLangId == divinity-story-goal"
         }
       ]
     },

@@ -1,3 +1,7 @@
+# Version 1.0.7
+
+- Hotfix: Prevent a dead lock when loading projects.
+
 # Version 1.0.6
 
 - Enumeration support: enables better code completion for parameters that rely on value lists. Also shows up in the documentation.

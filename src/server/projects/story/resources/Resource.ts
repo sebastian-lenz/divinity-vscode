@@ -119,7 +119,7 @@ export default abstract class Resource<T extends AnyNode = AnyNode> {
   }
 
   invalidate() {
-    if (this.isHeaderGoal() || this.isInvalid) return;
+    if (this.isHeaderGoal() || this.isInvalid || this.story.isInitializing) return;
     this.isInvalid = true;
 
     setImmediate(() => {

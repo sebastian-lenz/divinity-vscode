@@ -32,6 +32,10 @@ export default class EnumerationAnalyzer extends SyncAnalyzer {
       return false;
     }
 
+    if (node.value === "") {
+      return false;
+    }
+
     const { enumeration } = caller.symbol.parameters[index];
     if (!enumeration || !enumeration.fixed) {
       return false;

@@ -643,23 +643,11 @@
     "description": "The source of the applied damage.",
     "fixed": true,
     "values": [
-      { "value": "BaseLevelDamage" },
-      { "value": "AverageLevelDamge" },
-      { "value": "MonsterWeaponDamage" },
-      { "value": "SourceMaximumVitality" },
-      { "value": "SourceMaximumPhysicalArmor" },
-      { "value": "SourceMaximumMagicArmor" },
-      { "value": "SourceCurrentVitality" },
-      { "value": "SourceCurrentPhysicalArmor" },
-      { "value": "SourceCurrentMagicArmor" },
-      { "value": "SourceShieldPhysicalArmor" },
-      { "value": "TargetMaximumVitality" },
-      { "value": "TargetMaximumPhysicalArmor" },
-      { "value": "TargetMaximumMagicArmor" },
-      { "value": "TargetCurrentVitality" },
-      { "value": "TargetCurrentPhysicalArmor" },
-      { "value": "TargetCurrentMagicArmor" },
-      { "value": "TargetCurrentMagicArmor" }
+      { "value": "Attack" },
+      { "value": "SurfaceCreate" },
+      { "value": "SurfaceMove" },
+      { "value": "StatusEnter" },
+      { "value": "StatusTick" }
     ],
     "parameters": [{ "name": "AttackedByObject", "index": 4 }]
   },

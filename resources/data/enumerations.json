@@ -429,7 +429,10 @@
       { "name": "GlobalFlagSet", "index": 0 },
       { "name": "GlobalGetFlag", "index": 0 },
       { "name": "GlobalSetFlag", "index": 0 },
-      { "name": "GlobalShareFlag", "index": 0 }
+      { "name": "GlobalShareFlag", "index": 0 },
+      { "name": "InventoryLaunchIterator", "index": 2 },
+      { "name": "InventoryLaunchTagIterator", "index": 4 },
+      { "name": "InventoryLaunchTemplateIterator", "index": 3 }
     ]
   },
   {
@@ -2064,10 +2067,10 @@
       { "name": "CharacterLaunchIterator", "index": 0 },
       { "name": "CharacterLaunchIteratorAroundObject", "index": 2 },
       { "name": "CharacterLaunchOsirisOnlyIterator", "index": 0 },
-      { "name": "InventoryLaunchIterator", "index": 2 },
-      { "name": "InventoryLaunchTagIterator", "index": 4 },
-      { "name": "InventoryLaunchTemplateIterator", "index": 3 },
+      { "name": "InventoryLaunchIterator", "index": 1 },
       { "name": "ItemLaunchIterator", "index": 0 },
+      { "name": "InventoryLaunchTagIterator", "index": 3 },
+      { "name": "InventoryLaunchTemplateIterator", "index": 2 },
       { "name": "TriggerLaunchIterator", "index": 1 },
       { "name": "CharacterCreateAtPositionOutOfSightTo", "index": 6 },
       { "name": "CharacterCreateOutOfSightToObject", "index": 4 },
@@ -2083,9 +2086,6 @@
     "type": "string",
     "description": "The name of the character/item event.",
     "parameters": [
-      { "name": "InventoryLaunchIterator", "index": 1 },
-      { "name": "InventoryLaunchTagIterator", "index": 3 },
-      { "name": "InventoryLaunchTemplateIterator", "index": 2 },
       { "name": "CharacterItemEvent", "index": 2 },
       { "name": "CharacterItemSetEvent", "index": 2 }
     ]

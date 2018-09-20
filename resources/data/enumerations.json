@@ -206,7 +206,6 @@
       { "name": "CharacterTransform", "index": 8 },
       { "name": "CharacterTransformAppearanceTo", "index": 2 },
       { "name": "CharacterTransformAppearanceTo", "index": 3 },
-      { "name": "CharacterTransformAppearanceToWithEquipmentSet", "index": 2 },
       { "name": "CharacterTransformAppearanceToWithEquipmentSet", "index": 3 },
       { "name": "CharacterTransformFromCharacter", "index": 2 },
       { "name": "CharacterTransformFromCharacter", "index": 3 },

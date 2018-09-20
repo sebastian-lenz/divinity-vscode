@@ -1,3 +1,7 @@
+# Version 1.0.9
+
+- Enumeration definition update
+
 # Version 1.0.8
 
 - Hotfix: Prevent a dead lock when editing goals.

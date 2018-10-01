@@ -97,9 +97,55 @@ export default class CompletionFeature extends Feature {
     };
   }
 
-  getConditionCompletions(resource: Resource): Array<CompletionItem> {
+  getComparisonCompletions(
+    resource: Resource,
+    leftOperant: string,
+    nodes?: Array<AnyNode>,
+    offset?: number
+  ): Array<CompletionItem> {
+    const variablesAt = this.getVariablesAt(nodes, offset);
+    const result: Array<CompletionItem> = [];
+    if (!variablesAt) {
+      return result;
+    }
+
+    leftOperant = leftOperant.toLocaleLowerCase();
+    const variable = variablesAt.variables.find(
+      variable => variable.name === leftOperant
+    );
+
+    if (variable) {
+      if (variable.enumeration) {
+        variable.enumeration.collectCompletions(result);
+      }
+
+      if (variable.type && isGuidType(variable.type)) {
+        const { levels } = resource.story.project;
+        levels.collectCompletions(result, variable.type);
+        result.push({
+          label: "NULL_00000000-0000-0000-0000-000000000000"
+        });
+      }
+    }
+
+    for (const variable of variablesAt.variables) {
+      result.push({
+        detail: printParameterType(variable.type),
+        kind: CompletionItemKind.Variable,
+        label: variable.displayName
+      });
+    }
+
+    return result;
+  }
+
+  getConditionCompletions(
+    resource: Resource,
+    nodes?: Array<AnyNode>,
+    offset?: number
+  ): Array<CompletionItem> {
     const { symbols } = resource.story.symbols;
-    return this.getSymbolCompletions(
+    const result = this.getSymbolCompletions(
       resource.story.project,
       symbols.filter(
         symbol =>
@@ -107,6 +153,19 @@ export default class CompletionFeature extends Feature {
           symbol.type === SymbolType.Query
       )
     );
+
+    const variablesAt = this.getVariablesAt(nodes, offset);
+    if (variablesAt) {
+      for (const variable of variablesAt.variablesBefore) {
+        result.push({
+          detail: printParameterType(variable.type),
+          kind: CompletionItemKind.Variable,
+          label: variable.displayName
+        });
+      }
+    }
+
+    return result;
   }
 
   getEventCompletions(resource: Resource): Array<CompletionItem> {
@@ -308,27 +367,58 @@ export default class CompletionFeature extends Feature {
       }
     }
 
-    if (document && type === CompletionType.Global) {
+    // Pure text based completions
+    if (document) {
       const chunk = document.getText({
         start: document.positionAt(
-          Math.max(0, document.offsetAt(params.position) - 64)
+          Math.max(0, document.offsetAt(params.position) - 1024)
         ),
         end: params.position
       });
 
-      const match = /(AND|IF|PROC|QRY)[\n\r\s]+[A-Za-z0-9_-]*$/.exec(chunk);
-      if (match) {
-        if (match[1] === "AND") {
-          type = CompletionType.Condition;
-        } else {
-          type = fromRuleType(match[1], type);
+      // No completions for line comments
+      if (/\/\/[^\r\n]*$/.test(chunk)) {
+        return [];
+      }
+
+      // No completions for block comments
+      if (/\/\*((?!\*\/).)*$/.test(chunk)) {
+        return [];
+      }
+
+      // Completion after an operator
+      if (type === CompletionType.Global || type === CompletionType.Condition) {
+        const match = /([^\s\n\r]+)\s*[=><]=?\s*[A-Za-z0-9_-]*$/.exec(chunk);
+        if (match) {
+          return this.getComparisonCompletions(
+            resource,
+            match[1],
+            nodes,
+            document ? document.offsetAt(params.position) : undefined
+          );
+        }
+      }
+
+      // Finally, check whether we can improve gloabl completion
+      if (type === CompletionType.Global) {
+        const match = /(AND|IF|PROC|QRY)[\n\r\s]+[A-Za-z0-9_-]*$/.exec(chunk);
+        if (match) {
+          if (match[1] === "AND") {
+            type = CompletionType.Condition;
+          } else {
+            type = fromRuleType(match[1], type);
+          }
         }
       }
     }
 
     switch (type) {
       case CompletionType.Condition:
-        return this.getConditionCompletions(resource);
+        return this.getConditionCompletions(
+          resource,
+          nodes,
+          document ? document.offsetAt(params.position) : undefined
+        );
       case CompletionType.Events:
         return this.getEventCompletions(resource);
       case CompletionType.Parameter:

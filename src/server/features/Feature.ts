@@ -10,8 +10,13 @@ import isCallerNode, { CallerNode } from "../parsers/story/utils/isCallerNode";
 import Resource from "../projects/story/resources/Resource";
 import Server from "../Server";
 import Symbol from "../projects/story/Symbol";
-import { AnyNode, NodeType, RuleNode } from "../parsers/story/models/nodes";
 import { Variable } from "../projects/story/models/symbol";
+import {
+  AnyNode,
+  NodeType,
+  RuleNode,
+  RuleBlockNode
+} from "../parsers/story/models/nodes";
 
 export interface LocationOptions {
   position: Position;
@@ -79,17 +84,36 @@ export default class Feature {
     return { nodes, resource };
   }
 
-  getVariablesAt(nodes?: Array<AnyNode>): VariablesAt | undefined {
+  getVariablesAt(
+    nodes?: Array<AnyNode>,
+    offset?: number
+  ): VariablesAt | undefined {
     if (!nodes) {
       return undefined;
     }
 
     const ruleIndex = nodes.findIndex(node => node.type === NodeType.Rule);
-    if (ruleIndex === -1) {
+    let rule: RuleNode | undefined;
+
+    if (ruleIndex !== -1) {
+      rule = nodes[ruleIndex] as RuleNode;
+    } else {
+      const ruleBlock = nodes.find(
+        node => node.type === NodeType.RuleBlock
+      ) as RuleBlockNode;
+
+      if (ruleBlock && typeof offset === "number") {
+        for (let index = 0; index < ruleBlock.rules.length; index++) {
+          if (ruleBlock.rules[index].startOffset > offset) break;
+          rule = ruleBlock.rules[index];
+        }
+      }
+    }
+
+    if (!rule) {
       return undefined;
     }
 
-    const rule = nodes[ruleIndex] as RuleNode;
     let result: VariablesAt = { rule, variablesBefore: [], variables: [] };
 
     for (const { node, variablesBefore, variables } of eachRuleNode(rule)) {

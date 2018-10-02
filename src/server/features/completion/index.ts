@@ -388,7 +388,7 @@ export default class CompletionFeature extends Feature {
 
       // Completion after an operator
       if (type === CompletionType.Global || type === CompletionType.Condition) {
-        const match = /([^\s\n\r]+)\s*[=><]=?\s*[A-Za-z0-9_-]*$/.exec(chunk);
+        const match = /([^\s\n\r]+)\s*[=><]=?\s*[A-Za-z0-9_"-]*$/.exec(chunk);
         if (match) {
           return this.getComparisonCompletions(
             resource,

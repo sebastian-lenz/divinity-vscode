@@ -1,3 +1,8 @@
+# Version 1.0.10
+
+- Simple completions for comparisons, no completions in comments
+- Stricter guid casts
+
 # Version 1.0.9
 
 - Enumeration definition update

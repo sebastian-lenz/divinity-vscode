@@ -87,7 +87,6 @@ function castType(
     if (isGuidType(from) && isGuidType(to)) return to;
   } else {
     if (to === ParameterType.Guid && isGuidType(from)) return to;
-    if (isGuidType(to) && from === ParameterType.Guid) return to;
   }
 
   if (allowNumericCast && isNumericType(from) && isNumericType(to)) return to;
@@ -332,7 +331,11 @@ export default class ParameterAnalyzer extends SyncAnalyzer {
     }
 
     // Check the type required by the definition
-    if (castType(parameterType, definition.type) === ParameterType.Invalid) {
+    const allowGuidCast = parameter.argument.type === NodeType.GuidLiteral;
+    if (
+      castType(parameterType, definition.type, false, allowGuidCast) ===
+      ParameterType.Invalid
+    ) {
       this.addDiagnostic(
         parameter,
         msgParameterTypeMismatch({

@@ -1,6 +1,5 @@
 {
-  "$schema":
-    "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Divinity story div",
   "scopeName": "text.divinity.storydiv",
   "patterns": [
@@ -40,7 +39,7 @@
         },
         {
           "name": "support.type.osiris",
-          "match": "\\([A-Z]+\\)"
+          "match": "\\([A-Z0-9]+\\)"
         },
         {
           "name": "keyword.control.osiris",
@@ -60,8 +59,7 @@
         },
         {
           "name": "constant.character.osiris",
-          "match":
-            "\\b(CHARACTERGUID|GUIDSTRING|ITEMGUID|SPLINEGUID|TRIGGERGUID)_[A-Za-z0-9_-]+\\b"
+          "match": "\\b(CHARACTERGUID|GUIDSTRING|ITEMGUID|SPLINEGUID|TRIGGERGUID)_[A-Za-z0-9_-]+\\b"
         },
         {
           "name": "variable.parameter.osiris",

@@ -19,6 +19,7 @@ import { Feature } from "..";
 import { isGuidType } from "../../projects/story/analyzers/Parameter";
 import { NodeType, AnyNode } from "../../parsers/story/models/nodes";
 import { SymbolType } from "../../projects/story/models/symbol";
+import { ParameterType } from "../../projects/story/models/parameter";
 
 const SYMBOL_DATA = "divinity.symbol:";
 
@@ -196,7 +197,11 @@ export default class CompletionFeature extends Feature {
     nodes?: Array<AnyNode>,
     parameter?: ParameterInfo
   ): Array<CompletionItem> {
-    const result = this.getSpecificParameterCompletions(resource, parameter);
+    let result = this.getSpecificParameterCompletions(resource, parameter);
+    if (result === null) {
+      result = [];
+      resource.story.project.levels.collectCompletions(result);
+    }
 
     const variablesAt = this.getVariablesAt(nodes);
     if (variablesAt) {
@@ -215,17 +220,23 @@ export default class CompletionFeature extends Feature {
   getSpecificParameterCompletions(
     resource: Resource,
     parameter?: ParameterInfo
-  ): Array<CompletionItem> {
+  ): Array<CompletionItem> | null {
     const result: Array<CompletionItem> = [];
-    if (!parameter) return result;
+    if (!parameter) return null;
 
     const { index, name } = parameter;
     const { symbols } = resource.story;
     const symbol = symbols.findSymbolWithMostParameters(name);
-    if (!symbol) return result;
+    if (!symbol) return null;
 
     const info = symbol.parameters[index];
-    if (!info) return result;
+    if (
+      !info ||
+      info.type === ParameterType.Unknown ||
+      info.type === ParameterType.Invalid
+    ) {
+      return null;
+    }
 
     if (info.enumeration) {
       info.enumeration.collectCompletions(result);

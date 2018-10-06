@@ -54,7 +54,7 @@
         },
         {
           "name": "support.type.osiris",
-          "match": "\\([A-Z0-9]+\\)"
+          "match": "\\([A-Z]+[0-9]*\\)"
         },
         {
           "name": "constant.numeric.osiris",

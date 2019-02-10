@@ -11,6 +11,7 @@ import {
   TaskProcessEndEvent,
   TaskProvider,
   TaskRevealKind,
+  TaskScope,
   TaskStartEvent,
   workspace,
   window
@@ -117,7 +118,13 @@ export default class TaskProviderFeature extends Feature
           definition.debugLog = compilerLogPath;
         }
 
-        const task = new Task(definition, caption, project.meta.name);
+        const task = new Task(
+          definition,
+          TaskScope.Workspace,
+          caption,
+          project.meta.name
+        );
+
         task.group = TaskGroup.Build;
         task.problemMatchers = [problemMatcher];
         task.presentationOptions = {

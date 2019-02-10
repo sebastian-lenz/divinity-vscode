@@ -402,11 +402,11 @@
     "tslib": "^1.9.3",
     "typescript": "2.8.3",
     "unzipper": "^0.9.3",
+    "vscode": "^1.1.29",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.2.3"
   },
   "dependencies": {
-    "vscode": "^1.1.29",
     "vscode-languageclient": "^5.0.0",
     "vscode-languageserver": "^5.0.0"
   }

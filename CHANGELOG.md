@@ -1,3 +1,7 @@
+# Version 1.0.11
+
+- VS Code 1.31 compatibility, tasks must have a scope now
+
 # Version 1.0.10
 
 - Simple completions for comparisons, no completions in comments

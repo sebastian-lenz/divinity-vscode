@@ -315,7 +315,8 @@ export default class Story {
     for (const dependency of dependencies) {
       const mod = await dataIndex.getMod(dependency);
       if (!mod) {
-        throw new Error(`Could not load project dependency "${dependency}"`);
+        console.error(`Could not load project dependency "${dependency}"`);
+        continue;
       }
 
       for (const goalName of Object.keys(mod.goals)) {

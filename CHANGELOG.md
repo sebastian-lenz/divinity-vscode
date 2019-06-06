@@ -1,3 +1,7 @@
+# Version 1.0.12
+
+- Ignore unresolved mod dependencies
+
 # Version 1.0.11
 
 - VS Code 1.31 compatibility, tasks must have a scope now

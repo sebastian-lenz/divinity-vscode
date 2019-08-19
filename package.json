@@ -4,7 +4,7 @@
   "description": "VS Code language support for Divinity Engine story scripts",
   "author": "Sebastian Lenz",
   "license": "MIT",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "publisher": "sebastian-lenz",
   "categories": [
     "Programming Languages"

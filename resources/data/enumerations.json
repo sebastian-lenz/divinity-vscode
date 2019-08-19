@@ -11,7 +11,6 @@
     "parameters": [
       { "name": "IsInArena", "index": 1 },
       { "name": "SetInArena", "index": 1 },
-      { "name": "CharacterAddToCharacterCreation", "index": 1 },
       { "name": "CharacterAddToCharacterCreation", "index": 2 },
       { "name": "IsCharacterCreationLevel", "index": 1 },
       { "name": "IsHardcoreMode", "index": 0 },
@@ -638,6 +637,18 @@
       { "name": "ApplyDamage", "index": 2 },
       { "name": "AttackedByObject", "index": 3 }
     ]
+  },
+  {
+    "name": "characterRespec",
+    "type": "string",
+    "description": "The allowed type of character creation.",
+    "fixed": true,
+    "values": [
+      { "value": 0, "label": "Initial character creation" },
+      { "value": 1, "label": "Complete respec (unused in DOS2)" },
+      { "value": 2, "label": "Partial respec (as used by the magic mirror)" }
+    ],
+    "parameters": [{ "name": "CharacterAddToCharacterCreation", "index": 1 }]
   },
   {
     "name": "damageSource",
